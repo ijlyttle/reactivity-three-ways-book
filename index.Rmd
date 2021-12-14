@@ -11,7 +11,7 @@ link-citations: yes
 
 # Preface {.unnumbered}
 
-The purpose of this book is to show how to implement a reactive data-science app using three languages/frameworks:
+The purpose of this book is to show how to implement reactive data-science apps using three languages/frameworks:
 
 -   R: Shiny
 -   Python: Dash
