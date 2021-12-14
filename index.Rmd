@@ -1,0 +1,19 @@
+---
+title: "Reactivity: Three Ways"
+author: "Ian Lyttle"
+date: "`r Sys.Date()`"
+site: "bookdown::bookdown_site"
+output:
+  bookdown::gitbook: default
+documentclass: book
+link-citations: yes
+---
+
+# Preface {.unnumbered}
+
+The purpose of this book is to show how to implement a reactive data-science app using three languages/frameworks:
+
+-   R: Shiny
+-   Python: Dash
+-   JavaScript: Observable
+
