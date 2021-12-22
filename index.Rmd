@@ -1,5 +1,5 @@
 ---
-title: "Reactivity: Three Ways"
+title: "Data-Science Reactivity: Three Ways"
 author: "Ian Lyttle"
 date: "`r Sys.Date()`"
 site: "bookdown::bookdown_site"
@@ -13,10 +13,22 @@ link-citations: yes
 
 The purpose of this book is to show how to implement reactive data-science apps using three languages/frameworks:
 
--   R: Shiny
--   Python: Dash
--   JavaScript: Observable
+-   R: [Shiny](https://shiny.rstudio.com/)
+-   Python: [Dash](https://dash.plotly.com/)
+-   JavaScript: [Observable](https://observablehq.com/@observablehq/five-minute-introduction)
 
-```{r}
-knitr::include_graphics("images/aggregator.svg")
-```
+An example app is created for each framework, where you can:
+
+ - upload a data-frame as CSV, using [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/) as default.
+   - show as a table.
+   - download as CSV.
+ - specify grouping columns, aggregation columns, and an aggregation function.
+ - create an aggregated data-frame from the input, using the specification.
+   - show as a table.
+   - download as CSV.
+ 
+ For Shiny, here's the [app](https://ijlyttle.shinyapps.io/aggregate-local) and the [code](https://github.com/ijlyttle/reactivity-demo-shiny).
+ 
+ For Dash, here's the [app](https://aggregate-local.herokuapp.com) and the [code](https://github.com/ijlyttle/reactivity-demo-dash).
+ 
+ For Observable, the [app is the code](https://observablehq.com/@ijlyttle/aggregate-local).
