@@ -2,6 +2,10 @@
 
 A few words on Shiny.
 
-```{r}
+```{r echo=FALSE, fig.cap="Reactivity diagram"}
 knitr::include_graphics("images/shiny-aggregate-local.svg")
+```
+
+```{r echo=FALSE, fig.cap="Legend"}
+knitr::include_graphics("images/shiny-legend.svg")
 ```

@@ -1,0 +1,11 @@
+# Observable
+
+A few words on Observable.
+
+```{r echo=FALSE, fig.cap="Reactivity diagram"}
+knitr::include_graphics("images/observable-aggregate-local.svg")
+```
+
+```{r echo=FALSE, fig.cap="Legend"}
+knitr::include_graphics("images/observable-legend.svg")
+```

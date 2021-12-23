@@ -1,0 +1,11 @@
+# Dash
+
+A few words on Dash.
+
+```{r echo=FALSE, fig.cap="Reactivity diagram"}
+knitr::include_graphics("images/dash-aggregate-local.svg")
+```
+
+```{r echo=FALSE, fig.cap="Legend"}
+knitr::include_graphics("images/dash-legend.svg")
+```
