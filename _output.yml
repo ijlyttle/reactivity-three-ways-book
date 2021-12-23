@@ -1,0 +1,15 @@
+bookdown::gitbook:
+  split_by: section
+  includes:
+    in_header: svg-script.html
+  config:
+    toc:
+      collapse: none
+      before: |
+        <li><a href="./">Data-Science Reactivity: Three Ways</a></li>
+    download: [pdf, epub, mobi]
+    sharing:
+      github: yes
+      facebook: no
+    search:
+      engine: fuse

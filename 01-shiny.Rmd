@@ -1,0 +1,7 @@
+# Shiny
+
+A few words on Shiny.
+
+```{r}
+knitr::include_graphics("images/shiny-aggregate-local.svg")
+```

@@ -3,8 +3,6 @@ title: "Data-Science Reactivity: Three Ways"
 author: "Ian Lyttle"
 date: "`r Sys.Date()`"
 site: "bookdown::bookdown_site"
-output:
-  bookdown::gitbook: default
 documentclass: book
 link-citations: yes
 ---

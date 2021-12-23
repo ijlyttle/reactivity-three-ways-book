@@ -1,0 +1,64 @@
+<script>
+  // wait for the DOM to finish loading, then run function
+  window.addEventListener('DOMContentLoaded', (event) => {
+
+    // we want to set some CSS according to the class of the book
+    //   - the theme of the book depends on the class
+    //       color-theme-1 means sepia
+    //       color-theme-2 means dark-mode
+
+    // see: https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver/observe#examples
+    // identify an element to observe
+    const elementToObserve = document.querySelector(".book");
+
+    // create a new instance of `MutationObserver` named `observer`,
+    // passing it a callback function
+    const observer = new MutationObserver(function() {
+
+      // img elements with src attribute that end in '.svg'
+      const selImageSvg = 'img[src$=".svg"]';
+
+      // span elements used for source-code highlighting
+      const selCodeHighlight = 'code[class*="sourceCode"] > span > span';
+
+      const setFilter = (value) => {
+        return (e) => e.style.filter = value;
+      }
+
+      if (elementToObserve.classList.contains('color-theme-1')) {
+
+        //console.log('i am sepia');
+        // sepia images
+        document.querySelectorAll(selImageSvg).forEach(setFilter('sepia(100%'));
+
+        // do nothing to  highlighting
+        document.querySelectorAll(selCodeHighlight).forEach(setFilter(null));
+     } else if (elementToObserve.classList.contains('color-theme-2')) {
+
+        //console.log('i am night');
+        // invert images
+        document.querySelectorAll(selImageSvg).forEach(setFilter('invert(100%)'));
+
+        // invert highlighting
+        document.querySelectorAll(selCodeHighlight).forEach(setFilter('invert(100%)'));
+      } else {
+
+        //console.log('i am white');
+        // do nothing to images
+        document.querySelectorAll(selImageSvg).forEach(setFilter(null));
+
+        // do nothing to  highlighting
+        document.querySelectorAll(selCodeHighlight).forEach(setFilter(null));
+      }
+
+    });
+
+    // call `observe()` on that MutationObserver instance,
+    // passing it the element to observe, and the options object
+    observer.observe(elementToObserve, {attributeFilter: ['class']});
+
+    // touch class to initiate observe event
+    elementToObserve.classList = elementToObserve.classList;
+
+  });
+</script>
