@@ -7,3 +7,4 @@ fig:unnamed-chunk-6
 shiny
 dash
 observable
+stray-thoughts
