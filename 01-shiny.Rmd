@@ -1,11 +1,356 @@
 # Shiny
 
-A few words on Shiny.
+Shiny was my introduction to reactive programming.
+Like many folks, I started by hacking at the keyboard to "get stuff working"; this is a perfectly-honorable path.
+Then, I watched Joe Cheng's tutorials ([Part 1](https://www.rstudio.com/resources/shiny-dev-con/reactivity-pt-1-joe-cheng/), [Part 2](https://www.rstudio.com/resources/shiny-dev-con/reactivity-pt-2/)), in which he explained some of the theory behind Shiny. 
+These talks started me on a path that completely changed my persepective and, eventually, my abilities as a programmer.
+
+In this chapter, I will:
+
+ - touch on some of the principles I learned from Joe's talks.
+ - show these principles in the demonstration app.
+
+## Principles
+
+Pure functions vs. side effects.
+
+Keep side effects out of your reactive elements.
+
+Use inputs and outputs for side effects - it changes the DOM.
+
+By keeping side effects out of your reactives, you can write regular R functions to all the work in your reactives.
+Such R functions can live outside the "reactive universe", which makes it easier to test your function.
+
+This came about since Joe's talks, but it's a powerful idea: Tidyverse: interactive programming vs. "string-based" programming.
+
+## Demonstration App
+
+The goal of this chapter is to highlight some design choices in the [source code](https://github.com/ijlyttle/reactivity-demo-shiny) of this [demonstration Shiny app](https://ijlyttle.shinyapps.io/aggregate-local).
+
+### Description
+
+To start with, spend a few minutes playing with the [app](https://github.com/ijlyttle/reactivity-demo-shiny), while referring back to these diagrams:
 
 ```{r echo=FALSE, fig.cap="Reactivity diagram"}
 knitr::include_graphics("images/shiny-aggregate-local.svg")
 ```
 
+Each `input` and `output` you see in the diagram is a part of the UI of the app.
+The reactive expressions, in this case: `inp` and `agg`, are found only in the app's server-function.
+
+The solid lines indicate immediate downstream-evaluation if the upstream value changes; this is what we think of when we hear "reactivity".
+The dashed lines indicate that downstream-evaluation does not immediate follow an upstream change. 
+For example, the reactive-expression `agg` is updated only when the `button` is pushed.
+
 ```{r echo=FALSE, fig.cap="Legend"}
 knitr::include_graphics("images/shiny-legend.svg")
 ```
+
+Spend some time to study the app, to make sure that these diagrams agree with your understanding of how the app operates.
+
+### Helper functions
+
+Before writing a Shiny app, I like to write out a set of non-reactive functions that will do the "heavy lifting". 
+To the extent possible, these are pure functions.
+
+To test things, we'll use the [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/) dataset:
+
+```{r penguins}
+library("palmerpenguins")
+library("tibble")
+
+penguins
+```
+
+In fact, the first function is not even a function.
+It is an enumeration of the choices for the aggregation function:
+
+```{r agg_function_choices}
+# choices for aggregation functions
+agg_function_choices <- c("mean", "min", "max")
+```
+
+Next, a couple of functions that, given a data frame, returns the names of:
+
+ - numerical variables
+ - categorical variables
+ 
+You might quibble with how I've defined these here, but it works for me, for this example.
+
+```{r cols_number}
+# given a data frame, return the names of numeric columns
+cols_number <- function(df) {
+  df_select <- dplyr::select(df, where(~is.numeric(.x) | is.integer(.x)) ) 
+  names(df_select)
+}
+```
+
+```{r cols_category}
+# given a data frame, return the names of string and factor columns
+cols_category <- function(df) {
+  df_select <- dplyr::select(df, where(~is.character(.x) | is.factor(.x)) ) 
+  names(df_select)
+}
+```
+
+You may have noticed that I refer to functions using the package name, e.g. `dplyr::select()`.
+This is a habit I learned following Hadley Wickham; basically:
+
+ - I like to be as explicit as possible when writing functions.
+   It provides fewer opportunities for strange things to happen; I provide enough opportunities as it is.
+   
+ - The function is more ready to be included in a package.
+
+The reason I write these functions is that I can test them without worrying about "reactive stuff":
+
+```{r penguins-numerical}
+cols_number(penguins)
+```
+
+```{r penguins-category}
+cols_category(penguins)
+```
+
+Let's look at the aggregation function:
+
+```{r group_aggregate}
+group_aggregate <- function(df, str_group, str_agg, str_fn_agg, 
+                            str_fn_choices = agg_function_choices) {
+  
+  # safeguard the aggregation function
+  stopifnot(
+    str_fn_agg %in% str_fn_choices
+  )
+  
+  # get the aggregation function
+  func <- get(str_fn_agg)
+  
+  df |>
+    dplyr::group_by(dplyr::across(dplyr::all_of(str_group))) |>
+    dplyr::summarise(
+      dplyr::across(dplyr::all_of(str_agg), func, na.rm = TRUE)
+    )
+}
+```
+
+There's a few things I want to point out about this function:
+
+ - Aside from the data frame, all the arguments are strings. 
+   It is designed for use with Shiny, not for interactive use.
+
+ - We are using `agg_function_choices` to make sure that we won't execute arbitrary code.
+   We turn the string into binding to a function using `get()`.
+
+ - We use dplyr's `across()` function, which lets us use `select()` semantics in "data-masking" functions, e.g. `group_by()`, `summarise()`.
+ 
+ - To select data-frame variables using strings, we use `all_of()`.
+
+For example if we were grouping by `"island"`, then aggregating over `"bill_length_mm"` and `"bill_depth_mm"` using `"mean"`,
+our interactive code might look like:
+
+```{r aggregate-interactive}
+library("dplyr")
+
+penguins |>
+  group_by(island) %>%
+  summarise(
+    bill_length_mm = mean(bill_length_mm, na.rm = TRUE),
+    bill_depth_mm = mean(bill_depth_mm, na.rm = TRUE)
+  )
+```
+
+We can use this result to help verify that our "string" version is working:
+
+```{r aggregate_string}
+group_aggregate(
+  penguins, 
+  str_group = "island", 
+  str_agg = c("bill_length_mm", "bill_depth_mm"),
+  str_fn_agg = "mean"
+)
+```
+
+### UI
+
+The UI object is relatively straightforward; we use a `fluidPage()` with a narrower column for (mostly) inputs and a wider column for outputs.
+
+To give a clearer view of the high-level structure of the page, I replaced the code for the inputs and outputs with `...`:
+
+```{r eval=FALSE}
+library("shiny")
+
+ui <- fluidPage(
+  titlePanel("Aggregator"),
+  fluidRow(
+    column(
+      width = 4, 
+      wellPanel(
+        h3("Input data"),
+        ...
+      ),
+      wellPanel(
+        h3("Aggregation"),
+        ...
+      ),
+      wellPanel(
+        h3("Aggregated data"),
+        ...    
+      )
+    ),
+    column(
+      width = 8,
+      h3("Input data"),
+      ...
+      hr(),
+      h3("Aggregated data"),
+      ...
+    )
+  )
+)
+```
+
+One of the inputs I would like to point out is for `input$cols_group`.
+
+```{r cols_group, eval=FALSE}
+selectizeInput(
+  inputId = "cols_group",
+  label = "Grouping columns",
+  choices = c(),
+  multiple = TRUE
+)
+```
+
+Note that the initial `choices` is supplied as an empty vector.
+Note also that the reactivity diagram for `cols_group` has a connection coming in from the "top", rather than the side.
+This is to indicate that we will use a server function to update the `choices` for  this input, using information from the `inp` data frame.
+
+### Server function
+
+This may be a habit particular to me, but I like to organize a server-function into groups:
+
+```{r server_overview, eval=FALSE}
+server <- function(input, output, session) 
+  # input observers
+  # reactive expressions and values
+  # output observers
+  # outputs
+}  
+```
+
+For the demo app, I am not using output-observers; each of the other categories is discussed in a section.
+
+### Server input-observers
+
+There are two inputs: `cols_group` and `cols_agg`, whose `choices` change according to the reactive-expression `inp()`. 
+
+To make such a change, we use a Shiny `observer()`, which responds eagerly to any change to its reactive dependencies.
+An `observer()` does not return a value; instead, it causes a side-effect. 
+In this case, it changes an input element in the DOM.
+
+The observers are substantially similar, so I'll shoe only `cols_group`:
+
+```{r server_input_observers, eval=FALSE}
+  observe({
+    # this runs whenever the parsed input data changes
+    updateSelectizeInput(
+      session,
+      inputId = "cols_group",
+      choices = cols_category(inp())
+    )
+  }) 
+```
+
+Note that one of our helper functions, `cols_category()`, makes an appearance. 
+Now, the `choices` for the `cols_group` input are taken from the names of the categorical variables in the `inp()` data frame.
+
+### Server reactive-expressions
+
+This app uses two reactive expressions:
+
+- `inp()`, which returns the input data-frame.
+- `agg()`, which reutuns the aggregated data-frame.
+
+```{r inp, eval=FALSE}
+inp <- 
+  reactive({
+   
+    # use palmer penguins as default
+    if (is.null(input$upload_inp)) {
+      return(palmerpenguins::penguins)
+    }
+   
+    readr::read_csv(input$upload_inp$datapath, show_col_types = FALSE)
+  }) |>
+  bindEvent(input$upload_inp, ignoreNULL = FALSE, ignoreInit = FALSE)
+```
+
+Note that we have put some of the dependencies into a `reactive()` expression.
+We put a dependency on `input$upload_inp`, a `fileInput()`, into `bindEvent()`.
+This is a relatively new pattern in Shiny; it appeared in v1.6.0.
+
+`bindEvent()` will return the value return by the `reactive()`.
+However, it will evaluate the `reactive()` only when there is a change to `input$upload_inp`.
+
+- `ignoreNULL = FALSE`: the `reactive()` is evaluated even if `input$upload_inp` is `NULL`.
+- `ignoreInit = FALSE`: the `reactive()` is evaluated when the app is first initialized.
+
+In other words, the `reactive()` is under any condition. 
+In this case, it allows the default value, `palmerpenguins::penguins`, to propagate when the app is initialized.
+
+The reactive expression for `agg()` is a little different:
+
+```{r agg, eval=FALSE}
+agg <- 
+  reactive({
+         
+    req(input$func_agg %in% agg_function_choices)
+ 
+    group_aggregate(
+      inp(), 
+      str_group = input$cols_group, 
+      str_agg = input$cols_agg, 
+      str_fn_agg = input$func_agg
+    )
+  }) |>
+  bindEvent(input$button, ignoreNULL = TRUE, ignoreInit = TRUE)
+```
+
+We are using our `group_aggregate()` helper function here. 
+For me, having tested it outside of Shiny helped me focus on getting the rest of the reactive expression working.
+
+We use the `bindEvent()` pattern again; this time, the operative event comes from `input$button`.
+Here, all the "dotted-line" connections are implemented in the `reactive()`; the "solid-line" connection is made using `bindEvent()`.
+
+In this case:
+
+- `ignoreNULL = FALSE`: the `reactive()` is not evaluated if `input$button` is zero.
+- `ignoreInit = FALSE`: the `reactive()` is not evaluated when the app is first initialized.
+
+We have to wait for the button-click.
+
+Note that we use `req()` to validate the input. 
+You may remember that this is validated also in our helper function. 
+I realize that we are violating "Don't Repeat Yourself", but I think this merits a violation given the security consequences.
+You can read more about this in the [security chapter](https://mastering-shiny.org/scaling-security.html) of Mastering Shiny.
+
+### Server outputs
+
+There are a couple of sets of outputs: one for the `inp()` data, the other for the `agg()` data.
+Each set of outputs consists of:
+
+- a table output to display the data frame.
+- a download output to manage downloading the data frame to the user.
+
+These sets are similar to one another; we'll focus on the set for `inp()`:
+
+```{r output_inp, eval=FALSE}
+output$table_inp <- DT::renderDT(inp())
+
+output$download_inp <- downloadHandler(
+  filename = \() glue::glue("data-input-{Sys.Date()}.csv"),
+  content = \(file) readr::write_csv(inp(), file)
+)
+```
+
+The table output is a straightforward use of `DT::renderDT()`. 
+The `downloadHandler()` function is interesting, as both `filename` and `content` arguments accept functions.
