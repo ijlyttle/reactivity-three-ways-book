@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>A Stray Thoughts | Data-Science Reactivity: Three Ways</title>
-  <meta name="description" content="A Stray Thoughts | Data-Science Reactivity: Three Ways" />
+  <title>1.1 Principles | Data-Science Reactivity: Three Ways</title>
+  <meta name="description" content="1.1 Principles | Data-Science Reactivity: Three Ways" />
   <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="A Stray Thoughts | Data-Science Reactivity: Three Ways" />
+  <meta property="og:title" content="1.1 Principles | Data-Science Reactivity: Three Ways" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="A Stray Thoughts | Data-Science Reactivity: Three Ways" />
+  <meta name="twitter:title" content="1.1 Principles | Data-Science Reactivity: Three Ways" />
   
   
   
@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="observable.html"/>
-
+<link rel="prev" href="shiny.html"/>
+<link rel="next" href="demonstration-app.html"/>
 <script src="libs/header-attrs-2.11.3/header-attrs.js"></script>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
@@ -240,27 +240,22 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="stray-thoughts" class="section level1" number="4">
-<h1><span class="header-section-number">A</span> Stray Thoughts</h1>
-<p>Putting the code together, I have had a lot of stray thoughts that I want to get into the text.
-I’m thinking to collect them here, then remove them as they get expressed more concretely elsewhere in this book.</p>
-<p>Shiny and Observable are more opinionated than Dash.</p>
-<p>Shiny and Observable manage the reactive graph for you; Dash makes you spell it out explicitly.</p>
-<p>Being more opinionated lets you code more concisely.
-Being less opinionated gives you more flexibility in what you create, at the price of more code.</p>
-<p>Shiny lets you store the state at the server; Dash and Observable do not.</p>
-<p>Dash and Observable use React under the hood.</p>
-<p>Shiny and Dash both offer a UI/server framework; in Observable, it’s all notebook.</p>
-<p>Observable supports (and encourages) the idea of importing functions from other published notebooks.</p>
-
+<div id="principles" class="section level2" number="1.1">
+<h2><span class="header-section-number">1.1</span> Principles</h2>
+<p>Pure functions vs. side effects.</p>
+<p>Keep side effects out of your reactive elements.</p>
+<p>Use inputs and outputs for side effects - it changes the DOM.</p>
+<p>By keeping side effects out of your reactives, you can write regular R functions to all the work in your reactives.
+Such R functions can live outside the “reactive universe”, which makes it easier to test your function.</p>
+<p>This came about since Joe’s talks, but it’s a powerful idea: Tidyverse: interactive programming vs. “string-based” programming.</p>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-<a href="observable.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-
+<a href="shiny.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="demonstration-app.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
