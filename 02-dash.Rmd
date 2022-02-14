@@ -1,11 +1,47 @@
 # Dash
 
-A few words on Dash.
+```{r}
+library("reticulate")
+library("here")
+use_virtualenv(here("env"))
+py_config()
+```
+
+```{python}
+import pandas as pd
+```
+
+This may be an oversimplification, but Dash seems like Python's answer to Shiny.
+
+## Principles
+
+In Shiny, the reactive graph (what depends on what) is inferred using the code in reactive expressions.
+
+In Dash, it is explicit, which is a mixed blessing. 
+It provides the flexability to do a lot of things, but the price is that *you* have to specify:
+
+- all the DOM components (UI elements) in the layout.
+- each connection between components is governed by a callback function that you provide.
+
+Here is the reactive graph for the demonstration app.
 
 ```{r echo=FALSE, fig.cap="Reactivity diagram"}
 knitr::include_graphics("images/dash-aggregate-local.svg")
 ```
 
+Each rectangle is a layout component. 
+Each circle is a callback function.
+
 ```{r echo=FALSE, fig.cap="Legend"}
 knitr::include_graphics("images/dash-legend.svg")
 ```
+
+Information cannot flow from one component to another unless it goes through a callback function.
+
+## Demonstration app
+
+### Helper functions
+
+### Layout
+
+### Callbacks

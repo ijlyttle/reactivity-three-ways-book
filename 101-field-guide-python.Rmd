@@ -1,0 +1,17 @@
+# Field Guide to Python
+
+Version 
+
+Virtual Environment
+
+Pip install
+
+Imports
+
+```{python eval=FALSE}
+import foo
+import foo as bar
+from foo import bar
+```
+
+`requirements.txt`
