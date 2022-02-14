@@ -5,16 +5,13 @@
       {
         "Name": "CRAN",
         "URL": "https://cloud.r-project.org"
-      },
-      {
-        "Name": "SE",
-        "URL": "https://global-artifacts.se.com/artifactory/r-squared-cran-prod-local"
       }
     ]
   },
   "Python": {
     "Version": "3.8.9",
-    "Type": "virtualenv"
+    "Type": "virtualenv",
+    "Name": "./env"
   },
   "Packages": {
     "Matrix": {
