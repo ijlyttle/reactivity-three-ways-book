@@ -1,9 +1,9 @@
 fig:unnamed-chunk-1
 fig:unnamed-chunk-2
-fig:unnamed-chunk-4
-fig:unnamed-chunk-5
 fig:unnamed-chunk-6
 fig:unnamed-chunk-7
+fig:unnamed-chunk-8
+fig:unnamed-chunk-9
 shiny
 principles
 demonstration-app
@@ -15,5 +15,11 @@ server-input-observers
 server-reactive-expressions
 server-outputs
 dash
+principles-1
+demonstration-app-1
+helper-functions-1
+layout
+callbacks
 observable
 stray-thoughts
+field-guide-to-python
