@@ -28,6 +28,10 @@ It provides the flexability to do a lot of things, but the price is that *you* h
 - each connection between components is governed by a callback function that you provide.
 - think in terms of JSON and base64-encoded data; this is what gets moved around.
 
+## Demonstration app
+
+### Description
+
 Here is the reactive graph for the demonstration app.
 
 ```{r echo=FALSE, fig.cap="Reactivity diagram"}
@@ -42,8 +46,6 @@ knitr::include_graphics("images/dash-legend.svg")
 ```
 
 Information cannot flow from one component to another unless it goes through a callback function.
-
-## Demonstration app
 
 ### Helper functions
 
@@ -114,21 +116,9 @@ app.layout = html.Div(
                     className='col-sm-4',
                     children=[
                         dbc.Card([
-                            dbc.CardHeader('Input data'),
-                            dbc.CardBody([
-                              ...
-                            ])
-                        ]),
-                        dbc.Card([
                             dbc.CardHeader('Aggregation'),
                             dbc.CardBody([
                               ...
-                            ])
-                        ]),
-                        dbc.Card([
-                            dbc.CardHeader('Aggregated data'),
-                            dbc.CardBody([
-                                ...
                             ])
                         ])
                     ]

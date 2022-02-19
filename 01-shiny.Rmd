@@ -8,7 +8,7 @@ These talks started me on a path that completely changed my persepective and, ev
 In this chapter, I will:
 
  - touch on some of the principles I learned from Joe's talks.
- - show these principles in the demonstration app.
+ - show how these principles are implemented the [demonstration app](https://ijlyttle.shinyapps.io/aggregate-local).
 
 ## Principles
 
@@ -117,7 +117,7 @@ Let's look at the aggregation function:
 group_aggregate <- function(df, str_group, str_agg, str_fn_agg, 
                             str_fn_choices = agg_function_choices) {
   
-  # safeguard the aggregation function
+  # validate the aggregation function
   stopifnot(
     str_fn_agg %in% str_fn_choices
   )
@@ -185,10 +185,6 @@ ui <- fluidPage(
     column(
       width = 4, 
       wellPanel(
-        h3("Input data"),
-        ...
-      ),
-      wellPanel(
         h3("Aggregation"),
         ...
       ),
@@ -206,6 +202,54 @@ ui <- fluidPage(
       ...
     )
   )
+)
+```
+
+
+#### Inputs
+
+```{r ui_inputs, eval=FALSE}
+wellPanel(
+  h3("Aggregation"),
+  selectizeInput(
+    inputId = "cols_group",
+    label = "Grouping columns",
+    choices = c(),
+    multiple = TRUE
+  ),        
+  selectizeInput(
+    inputId = "cols_agg",
+    label = "Aggregation columns",
+    choices = c(),
+    multiple = TRUE
+  ),
+  selectizeInput(
+    inputId = "func_agg",
+    label = "Aggregation function",
+    choices = agg_function_choices,
+    multiple = FALSE
+  ),
+  actionButton(
+    inputId = "button",
+    label = "Submit"
+  )
+)
+```
+
+#### Outputs
+
+```{r ui_outputs, eval=FALSE}
+column(
+  width = 8,
+  h3("Input data"),
+  DT::DTOutput(
+    outputId = "table_inp"
+  ),
+  hr(),
+  h3("Aggregated data"),
+  DT::DTOutput(
+    outputId = "table_agg"
+  )      
 )
 ```
 
@@ -232,14 +276,13 @@ This may be a habit particular to me, but I like to organize a server-function i
 server <- function(input, output, session) 
   # input observers
   # reactive expressions and values
-  # output observers
   # outputs
 }  
 ```
 
 For the demo app, I am not using output-observers; each of the other categories is discussed in a section.
 
-### Server input-observers
+#### Input observers
 
 There are two inputs: `cols_group` and `cols_agg`, whose `choices` change according to the reactive-expression `inp()`. 
 
@@ -247,23 +290,23 @@ To make such a change, we use a Shiny `observer()`, which responds eagerly to an
 An `observer()` does not return a value; instead, it causes a side-effect. 
 In this case, it changes an input element in the DOM.
 
-The observers are substantially similar, so I'll shoe only `cols_group`:
+The observers are substantially similar, so I'll show only `cols_group`:
 
 ```{r server_input_observers, eval=FALSE}
-  observe({
-    # this runs whenever the parsed input data changes
-    updateSelectizeInput(
-      session,
-      inputId = "cols_group",
-      choices = cols_category(inp())
-    )
-  }) 
+observe({
+  # this runs whenever the parsed input data changes
+  updateSelectizeInput(
+    session,
+    inputId = "cols_group",
+    choices = cols_category(inp())
+  )
+}) 
 ```
 
 Note that one of our helper functions, `cols_category()`, makes an appearance. 
 Now, the `choices` for the `cols_group` input are taken from the names of the categorical variables in the `inp()` data frame.
 
-### Server reactive-expressions
+#### Reactive expressions
 
 This app uses two reactive expressions:
 
@@ -272,32 +315,15 @@ This app uses two reactive expressions:
 
 ```{r inp, eval=FALSE}
 inp <- 
-  reactive({
-   
-    # use palmer penguins as default
-    if (is.null(input$upload_inp)) {
-      return(palmerpenguins::penguins)
-    }
-   
-    readr::read_csv(input$upload_inp$datapath, show_col_types = FALSE)
-  }) |>
-  bindEvent(input$upload_inp, ignoreNULL = FALSE, ignoreInit = FALSE)
+  reactive({ 
+    palmerpenguins::penguins
+  }) 
 ```
 
-Note that we have put some of the dependencies into a `reactive()` expression.
-We put a dependency on `input$upload_inp`, a `fileInput()`, into `bindEvent()`.
-This is a relatively new pattern in Shiny; it appeared in v1.6.0.
+For this app, we probably did not need to wrap `palmerpenguins::penguins` in a `reactive()`. 
+I did this with future expansion in mind, where `inp()` could also return a data frame uploaded as a CSV file.
 
-`bindEvent()` will return the value return by the `reactive()`.
-However, it will evaluate the `reactive()` only when there is a change to `input$upload_inp`.
-
-- `ignoreNULL = FALSE`: the `reactive()` is evaluated even if `input$upload_inp` is `NULL`.
-- `ignoreInit = FALSE`: the `reactive()` is evaluated when the app is first initialized.
-
-In other words, the `reactive()` is under any condition. 
-In this case, it allows the default value, `palmerpenguins::penguins`, to propagate when the app is initialized.
-
-The reactive expression for `agg()` is a little different:
+The reactive expression for `agg()`, the aggregated data-frame, is more interesting:
 
 ```{r agg, eval=FALSE}
 agg <- 
@@ -315,42 +341,35 @@ agg <-
   bindEvent(input$button, ignoreNULL = TRUE, ignoreInit = TRUE)
 ```
 
-We are using our `group_aggregate()` helper function here. 
+First, we are using our `group_aggregate()` helper function here. 
 For me, having tested it outside of Shiny helped me focus on getting the rest of the reactive expression working.
 
-We use the `bindEvent()` pattern again; this time, the operative event comes from `input$button`.
-Here, all the "dotted-line" connections are implemented in the `reactive()`; the "solid-line" connection is made using `bindEvent()`.
+Note that we have put some of the dependencies into a `reactive()` expression.
+We put a dependency on `input$button` into `bindEvent()`.
+This is a relatively new pattern in Shiny; it appeared in v1.6.0.
 
-In this case:
+`bindEvent()` will return the value returned by the `reactive()`.
+However, it will evaluate the `reactive()` only when there is a change to `input$button`.
 
 - `ignoreNULL = FALSE`: the `reactive()` is not evaluated if `input$button` is zero.
 - `ignoreInit = FALSE`: the `reactive()` is not evaluated when the app is first initialized.
 
-We have to wait for the button-click.
+In other words, we have to wait for the button-click.
 
-Note that we use `req()` to validate the input. 
+As well, we are using `req()` to validate the input. 
 You may remember that this is validated also in our helper function. 
-I realize that we are violating "Don't Repeat Yourself", but I think this merits a violation given the security consequences.
+I realize that we are violating "Don't Repeat Yourself"; I think that security merits redundancy.
 You can read more about this in the [security chapter](https://mastering-shiny.org/scaling-security.html) of Mastering Shiny.
 
-### Server outputs
+#### Outputs
 
-There are a couple of sets of outputs: one for the `inp()` data, the other for the `agg()` data.
-Each set of outputs consists of:
+There two outputs: one for the `inp()` data, the other for the `agg()` data; each is a table output.
 
-- a table output to display the data frame.
-- a download output to manage downloading the data frame to the user.
-
-These sets are similar to one another; we'll focus on the set for `inp()`:
+These outputs are similar to one another; we'll focus on `output$table_inp`:
 
 ```{r output_inp, eval=FALSE}
 output$table_inp <- DT::renderDT(inp())
-
-output$download_inp <- downloadHandler(
-  filename = \() glue::glue("data-input-{Sys.Date()}.csv"),
-  content = \(file) readr::write_csv(inp(), file)
-)
 ```
 
 The table output is a straightforward use of `DT::renderDT()`. 
-The `downloadHandler()` function is interesting, as both `filename` and `content` arguments accept functions.
+

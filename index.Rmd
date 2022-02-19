@@ -17,11 +17,11 @@ The purpose of this book is to introduce reactive data-science apps using three 
 
 An example app is created for each framework:
 
- - starting with the penguins data-frame from [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/):
+ - starting with the `penguins` data-frame from [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/):
    - show it as a table.
    - specify grouping columns, aggregation columns, and an aggregation function.
  - create an aggregated data-frame from the input, using the specification.
-   - show aggregated data-frame as a table.
+   - show the aggregated data-frame as a table.
    
 The audience I have in mind are folks who know how to develop a basic Shiny app, and wish to extend their knowledge to Dash (Python) or Observable (JavaScript). I will assume you have:
 
