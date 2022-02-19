@@ -20,7 +20,7 @@
       const selImageSvg = 'img[src$=".svg"]';
 
       // span elements used for source-code highlighting
-      const selCodeHighlight = 'code[class*="sourceCode"] > span > span';
+      const selCodeHighlight = 'code.sourceCode > span > span:not(.bu):not(.im)';
 
       // create a callback function for an element to change its style.filter
       const setFilter = (value) => {
