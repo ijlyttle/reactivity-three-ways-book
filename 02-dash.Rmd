@@ -4,11 +4,15 @@
 library("reticulate")
 library("here")
 use_virtualenv(here("env"))
-py_config()
+# py_config()
 ```
 
 ```{python}
 import pandas as pd
+from palmerpenguins import load_penguins
+
+penguins = load_penguins()
+print(penguins)
 ```
 
 This may be an oversimplification, but Dash seems like Python's answer to Shiny.
@@ -22,6 +26,7 @@ It provides the flexability to do a lot of things, but the price is that *you* h
 
 - all the DOM components (UI elements) in the layout.
 - each connection between components is governed by a callback function that you provide.
+- think in terms of JSON and base64-encoded data; this is what gets moved around.
 
 Here is the reactive graph for the demonstration app.
 
@@ -42,6 +47,107 @@ Information cannot flow from one component to another unless it goes through a c
 
 ### Helper functions
 
+```{python}
+penguins_records = penguins.to_dict('records')
+```
+
+```{python}
+def cols_choice (data_records, include):
+    df = pd.DataFrame.from_dict(data_records)
+    col_names = df.select_dtypes(include=include).columns.to_list()
+    
+    return [{'label': i, 'value': i} for i in col_names]
+  
+cols_choice(penguins_records, 'object')
+cols_choice(penguins_records, 'number')
+```
+
+```{python}
+def cols_header (data_records):
+    cols = []
+    if (len(data_records) > 0):
+        cols = [{'name': i, 'id': i} for i in data_records[0].keys()]
+
+    return cols
+  
+cols_header(penguins_records)  
+```
+
+```{python}
+def aggregate_df (df, cols_group, cols_agg, func_agg):
+    if (not cols_group is None):
+        df = df.groupby(cols_group)
+
+    if (cols_agg is None or len(cols_agg) == 0):
+        return []
+    
+    dict_agg = {}
+    for col in cols_agg:
+        dict_agg[col] = func_agg
+    
+    # aggregate DataFrame
+    df = df.agg(dict_agg).reset_index()
+
+    return df
+  
+aggregate_df(
+  penguins, 
+  cols_group = "island", 
+  cols_agg = ["bill_length_mm", "bill_depth_mm"],
+  func_agg = "mean"
+)  
+```
+
 ### Layout
+
+```{python eval=FALSE}
+app.layout = html.Div(
+    className='container-fluid',
+    children=[
+        dcc.Store(id='inp', data=penguins.to_dict('records')),
+        dcc.Store(id='agg', data=[]),
+        html.H2('Aggregator'),
+        html.Div(
+            className='row',
+            children =[
+                html.Div(
+                    className='col-sm-4',
+                    children=[
+                        dbc.Card([
+                            dbc.CardHeader('Input data'),
+                            dbc.CardBody([
+                              ...
+                            ])
+                        ]),
+                        dbc.Card([
+                            dbc.CardHeader('Aggregation'),
+                            dbc.CardBody([
+                              ...
+                            ])
+                        ]),
+                        dbc.Card([
+                            dbc.CardHeader('Aggregated data'),
+                            dbc.CardBody([
+                                ...
+                            ])
+                        ])
+                    ]
+                ),
+                html.Div(
+                    className='col-sm-8',
+                    children=[
+                        html.H3('Input data'),
+                        ...
+                        html.Hr(),
+                        html.H3('Aggregated data'),
+                        ...
+                    ]
+                )
+            ]
+        )
+    ]
+) 
+```
+
 
 ### Callbacks

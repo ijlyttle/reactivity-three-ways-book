@@ -15,17 +15,15 @@ The purpose of this book is to introduce reactive data-science apps using three 
 -   Python: [Dash](https://dash.plotly.com/)
 -   JavaScript: [Observable](https://observablehq.com/@observablehq/five-minute-introduction)
 
-An example app is created for each framework, where you can:
+An example app is created for each framework:
 
- - upload a data-frame as CSV, using [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/) as default.
-   - show as a table.
-   - download as CSV.
- - specify grouping columns, aggregation columns, and an aggregation function.
+ - starting with the penguins data-frame from [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/):
+   - show it as a table.
+   - specify grouping columns, aggregation columns, and an aggregation function.
  - create an aggregated data-frame from the input, using the specification.
-   - show as a table.
-   - download as CSV.
+   - show aggregated data-frame as a table.
    
-This book may be useful for someone who knows how to develop a Shiny app, and wishes to extend their knowledge to Dash (Python) or Observable (JavaScript). I will assume you have:
+The audience I have in mind are folks who know how to develop a basic Shiny app, and wish to extend their knowledge to Dash (Python) or Observable (JavaScript). I will assume you have:
 
  - basic knowledge of how to build a Shiny app.
  - some familiarity with the Tidyverse, in particular, dplyr.
