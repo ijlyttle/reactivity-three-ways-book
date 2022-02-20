@@ -261,16 +261,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="dash" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> Dash</h1>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="dash.html#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;reticulate&quot;</span>)</span>
-<span id="cb28-2"><a href="dash.html#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;here&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="dash.html#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;reticulate&quot;</span>)</span>
+<span id="cb31-2"><a href="dash.html#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;here&quot;</span>)</span></code></pre></div>
 <pre><code>## here() starts at /home/runner/work/reactivity-three-ways-book/reactivity-three-ways-book</code></pre>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="dash.html#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">use_virtualenv</span>(<span class="fu">here</span>(<span class="st">&quot;env&quot;</span>))</span>
-<span id="cb30-2"><a href="dash.html#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="co"># py_config()</span></span></code></pre></div>
-<div class="sourceCode" id="cb31"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb31-1"><a href="dash.html#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb31-2"><a href="dash.html#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> palmerpenguins <span class="im">import</span> load_penguins</span>
-<span id="cb31-3"><a href="dash.html#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-4"><a href="dash.html#cb31-4" aria-hidden="true" tabindex="-1"></a>penguins <span class="op">=</span> load_penguins()</span>
-<span id="cb31-5"><a href="dash.html#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(penguins)</span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="dash.html#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">use_virtualenv</span>(<span class="fu">here</span>(<span class="st">&quot;env&quot;</span>))</span>
+<span id="cb33-2"><a href="dash.html#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="co"># py_config()</span></span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb34-1"><a href="dash.html#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb34-2"><a href="dash.html#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> palmerpenguins <span class="im">import</span> load_penguins</span>
+<span id="cb34-3"><a href="dash.html#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="dash.html#cb34-4" aria-hidden="true" tabindex="-1"></a>penguins <span class="op">=</span> load_penguins()</span>
+<span id="cb34-5"><a href="dash.html#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(penguins)</span></code></pre></div>
 <pre><code>##        species     island  bill_length_mm  ...  body_mass_g     sex  year
 ## 0       Adelie  Torgersen            39.1  ...       3750.0    male  2007
 ## 1       Adelie  Torgersen            39.5  ...       3800.0  female  2007

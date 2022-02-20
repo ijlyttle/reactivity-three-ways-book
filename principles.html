@@ -261,20 +261,77 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="principles" class="section level2" number="1.1">
 <h2><span class="header-section-number">1.1</span> Principles</h2>
+<p>These are some things to keep in mind to help you write more-understandable and predictable Shiny apps.</p>
 <div id="pure-functions-vs.-side-effects" class="section level3" number="1.1.1">
 <h3><span class="header-section-number">1.1.1</span> Pure functions vs. side effects</h3>
-<p>Once you are comfortable making basic shiny apps, there is</p>
+<p>This is the single biggest concept I have learned as a programmer, and I learned it relatively late in my career.</p>
+<p>A pure function has two properties:</p>
+<ul>
+<li>given the same set of arguments, it <em>always</em> returns the same value.</li>
+<li>it makes no changes outside of its scope.</li>
+</ul>
+<p>This can provide us some big benefits:</p>
+<ul>
+<li>it doesn’t matter where or how the return value is computed, we can rely on getting the same answer.</li>
+<li>we don’t have to worry about the environment changing as a result of calling the function.</li>
+</ul>
+<p>Here’s a couple of examples of pure functions:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="principles.html#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">function</span>(x) {</span>
+<span id="cb1-2"><a href="principles.html#cb1-2" aria-hidden="true" tabindex="-1"></a>  x<span class="sc">**</span><span class="dv">2</span> <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb1-3"><a href="principles.html#cb1-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-4"><a href="principles.html#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="principles.html#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="cf">function</span>(x) {</span>
+<span id="cb1-6"><a href="principles.html#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste</span>(x, <span class="st">&quot; using a pure function.&quot;</span>)</span>
+<span id="cb1-7"><a href="principles.html#cb1-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Pure functions are relatively striaghtforward to test because the output depends only on the inputs.</p>
+<p><em>Side effects</em> is a catch-all term for when a function’s behavior either:</p>
+<ul>
+<li>depends on something not passed in as an argument.</li>
+<li>changes the something outside of its scope, e.g.: writes a file, displays a plot.</li>
+</ul>
+<p>Here’s a couple of functions that either depend on or cause side effects:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="principles.html#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># return value depends on the *contents* of the file, not just file_name</span></span>
+<span id="cb2-2"><a href="principles.html#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="cf">function</span>(file_name) {</span>
+<span id="cb2-3"><a href="principles.html#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read.csv</span>(file_name)</span>
+<span id="cb2-4"><a href="principles.html#cb2-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-5"><a href="principles.html#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="principles.html#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># this might make a change in a remote service</span></span>
+<span id="cb2-7"><a href="principles.html#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="cf">function</span>(url) {</span>
+<span id="cb2-8"><a href="principles.html#cb2-8" aria-hidden="true" tabindex="-1"></a>  curl<span class="sc">::</span><span class="fu">curl</span>(url)</span>
+<span id="cb2-9"><a href="principles.html#cb2-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Aside from being non-deterministic, functions with side effects can take a long time to execute.</p>
+<p>Of course, side effects are not necessarily bad things, but we need to be aware of them.
+Your Shiny server-function will make much more sense, and be much easier to debug, if you recognize pure functions and side effects.</p>
 </div>
 <div id="reactives-vs.-observers" class="section level3" number="1.1.2">
 <h3><span class="header-section-number">1.1.2</span> Reactives vs. observers</h3>
-<p>Keep side effects out of your reactive elements.</p>
-<p>Use inputs and outputs for side effects - it changes the DOM.</p>
-<p>By keeping side effects out of your reactives, you can write regular R functions to all the work in your reactives.
-Such R functions can live outside the “reactive universe”, which makes it easier to test your function.</p>
+<p>Shiny server-functions provide two broad mechanisms for updating the state of your app:</p>
+<ul>
+<li><p><code>reactive()</code>: these return values, and should be used with pure functions.
+In other words, the returned value depends only on the reactive values it depends on.</p></li>
+<li><p><code>observe()</code>: there is no return value; instead, these cause side-effects.
+Very often, the effect is to change something in the UI, such as the choices in an input, or to render a plot.</p></li>
+</ul>
+<p>In Shiny, reactive expressions are designed to run quickly and often; observers are designed to be run sparingly.</p>
 </div>
 <div id="using-tidyverse-functions" class="section level3" number="1.1.3">
 <h3><span class="header-section-number">1.1.3</span> Using tidyverse functions</h3>
-<p>This came about since Joe’s talks, but it’s a powerful idea: Tidyverse: interactive programming vs. “string-based” programming.</p>
+<p>The tidyverse is designed with interactive programming in mind.
+It is meant to support code like this, without a lot of quotes or namespace qualifiers:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="principles.html#cb3-1" aria-hidden="true" tabindex="-1"></a>penguins <span class="sc">|&gt;</span></span>
+<span id="cb3-2"><a href="principles.html#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(island, sex) <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="principles.html#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">bill_length_mm =</span> <span class="fu">mean</span>(bill_length_mm))</span></code></pre></div>
+<p>In Shiny, variable (column) names in data frames are expressed as strings, rather than as bare variable-names.
+As well, in Shiny, we may want to <code>summarise()</code> an arbitrary set of variables.
+Thus, it can be a challenge to use tidyverse code in Shiny.</p>
+<p>It should not surprise us that the tidyverse folks offer tools to address this situation:</p>
+<ul>
+<li><code>&lt;tidy-select&gt;</code> is a set of tools to select variables within a data frame.
+Functions that use <code>&lt;tidy-select&gt;</code> include <code>dplyr::select()</code>, <code>tidyr::pivot_longer()</code>.
+Of particular use in Shiny are the selection helpers for strings: <code>dplyr::any_of()</code> and <code>dplyr::all_of()</code>.</li>
+<li><code>across()</code> lets us use a <code>&lt;tidy-select&gt;</code> specification in a data-masking function.
+More concretely, it lets us <code>group_by()</code> or <code>summarize()</code> over an arbitrary set of variables in a data frame.</li>
+</ul>
 </div>
 </div>
             </section>
