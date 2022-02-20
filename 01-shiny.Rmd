@@ -12,24 +12,94 @@ This chapter is meant to be a review of Shiny; we will:
 
 ## Principles
 
+These are some things to keep in mind to help you write more-understandable and predictable Shiny apps.
 
 ### Pure functions vs. side effects
 
-Once you are comfortable making basic shiny apps, there is 
+This is the single biggest concept I have learned as a programmer, and I learned it relatively late in my career.
 
+A pure function has two properties:
+
+- given the same set of arguments, it *always* returns the same value.
+- it makes no changes outside of its scope.
+
+This can provide us some big benefits:
+
+- it doesn't matter where or how the return value is computed, we can rely on getting the same answer.
+- we don't have to worry about the environment changing as a result of calling the function.
+
+Here's a couple of examples of pure functions:
+
+```{r pure_functions, eval=FALSE}
+function(x) {
+  x**2 - 1
+}
+
+function(x) {
+  paste(x, " using a pure function.")
+}
+```
+
+Pure functions are relatively striaghtforward to test because the output depends only on the inputs.
+
+*Side effects* is a catch-all term for when a function's behavior either:
+
+- depends on something not passed in as an argument.
+- changes the something outside of its scope, e.g.: writes a file, displays a plot.
+
+Here's a couple of functions that either depend on or cause side effects:
+
+```{r side_effects, eval=FALSE}
+# return value depends on the *contents* of the file, not just file_name
+function(file_name) {
+  read.csv(file_name)
+}
+
+# this might make a change in a remote service
+function(url) {
+  curl::curl(url)
+}
+```
+
+Aside from being non-deterministic, functions with side effects can take a long time to execute.
+
+Of course, side effects are not necessarily bad things, but we need to be aware of them. 
+Your Shiny server-function will make much more sense, and be much easier to debug, if you recognize pure functions and side effects.
 
 ### Reactives vs. observers
 
-Keep side effects out of your reactive elements.
+Shiny server-functions provide two broad mechanisms for updating the state of your app:
 
-Use inputs and outputs for side effects - it changes the DOM.
+- `reactive()`: these return values, and should be used with pure functions. 
+  In other words, the returned value depends only on the reactive values it depends on.
+  
+- `observe()`: there is no return value; instead, these cause side-effects. 
+  Very often, the effect is to change something in the UI, such as the choices in an input, or to render a plot.
 
-By keeping side effects out of your reactives, you can write regular R functions to all the work in your reactives.
-Such R functions can live outside the "reactive universe", which makes it easier to test your function.
+In Shiny, reactive expressions are designed to run quickly and often; observers are designed to be run sparingly.
 
 ### Using tidyverse functions
 
-This came about since Joe's talks, but it's a powerful idea: Tidyverse: interactive programming vs. "string-based" programming.
+The tidyverse is designed with interactive programming in mind. 
+It is meant to support code like this, without a lot of quotes or namespace qualifiers:
+
+```{r tidy, eval=FALSE}
+penguins |>
+  group_by(island, sex) |>
+  summarise(bill_length_mm = mean(bill_length_mm))
+```
+
+In Shiny, variable (column) names in data frames are expressed as strings, rather than as bare variable-names.
+As well, in Shiny, we may want to `summarise()` an arbitrary set of variables.
+Thus, it can be a challenge to use tidyverse code in Shiny.
+
+It should not surprise us that the tidyverse folks offer tools to address this situation:
+
+- `<tidy-select>` is a set of tools to select variables within a data frame. 
+  Functions that use `<tidy-select>` include `dplyr::select()`, `tidyr::pivot_longer()`.
+  Of particular use in Shiny are the selection helpers for strings: `dplyr::any_of()` and `dplyr::all_of()`.
+- `across()` lets us use a `<tidy-select>` specification in a data-masking function.
+  More concretely, it lets us `group_by()` or `summarize()` over an arbitrary set of variables in a data frame.
 
 ## Demonstration App
 
