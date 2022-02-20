@@ -28,6 +28,14 @@ It provides the flexability to do a lot of things, but the price is that *you* h
 - each connection between components is governed by a callback function that you provide.
 - think in terms of JSON and base64-encoded data; this is what gets moved around.
 
+### Everything that exists is a component
+
+### Everything that happens is a callback
+
+### Server cannot store state
+
+### Communicate using JSON or base64
+
 ## Demonstration app
 
 ### Description
@@ -100,7 +108,7 @@ aggregate_df(
 )  
 ```
 
-### Layout
+### Compmonent layout
 
 ```{python eval=FALSE}
 app.layout = html.Div(
