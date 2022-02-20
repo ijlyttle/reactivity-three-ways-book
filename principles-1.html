@@ -24,7 +24,7 @@
 <meta name="author" content="Ian Lyttle" />
 
 
-<meta name="date" content="2022-02-15" />
+<meta name="date" content="2022-02-20" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -75,7 +75,7 @@
       const selImageSvg = 'img[src$=".svg"]';
 
       // span elements used for source-code highlighting
-      const selCodeHighlight = 'code[class*="sourceCode"] > span > span';
+      const selCodeHighlight = 'code.sourceCode > span > span:not(.bu):not(.im)';
 
       // create a callback function for an element to change its style.filter
       const setFilter = (value) => {
@@ -207,26 +207,35 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
 <li class="chapter" data-level="1" data-path="shiny.html"><a href="shiny.html"><i class="fa fa-check"></i><b>1</b> Shiny</a>
 <ul>
-<li class="chapter" data-level="1.1" data-path="principles.html"><a href="principles.html"><i class="fa fa-check"></i><b>1.1</b> Principles</a></li>
+<li class="chapter" data-level="1.1" data-path="principles.html"><a href="principles.html"><i class="fa fa-check"></i><b>1.1</b> Principles</a>
+<ul>
+<li class="chapter" data-level="1.1.1" data-path="principles.html"><a href="principles.html#pure-functions-vs.-side-effects"><i class="fa fa-check"></i><b>1.1.1</b> Pure functions vs. side effects</a></li>
+<li class="chapter" data-level="1.1.2" data-path="principles.html"><a href="principles.html#reactives-vs.-observers"><i class="fa fa-check"></i><b>1.1.2</b> Reactives vs. observers</a></li>
+<li class="chapter" data-level="1.1.3" data-path="principles.html"><a href="principles.html#using-tidyverse-functions"><i class="fa fa-check"></i><b>1.1.3</b> Using tidyverse functions</a></li>
+</ul></li>
 <li class="chapter" data-level="1.2" data-path="demonstration-app.html"><a href="demonstration-app.html"><i class="fa fa-check"></i><b>1.2</b> Demonstration App</a>
 <ul>
 <li class="chapter" data-level="1.2.1" data-path="demonstration-app.html"><a href="demonstration-app.html#description"><i class="fa fa-check"></i><b>1.2.1</b> Description</a></li>
 <li class="chapter" data-level="1.2.2" data-path="demonstration-app.html"><a href="demonstration-app.html#helper-functions"><i class="fa fa-check"></i><b>1.2.2</b> Helper functions</a></li>
 <li class="chapter" data-level="1.2.3" data-path="demonstration-app.html"><a href="demonstration-app.html#ui"><i class="fa fa-check"></i><b>1.2.3</b> UI</a></li>
 <li class="chapter" data-level="1.2.4" data-path="demonstration-app.html"><a href="demonstration-app.html#server-function"><i class="fa fa-check"></i><b>1.2.4</b> Server function</a></li>
-<li class="chapter" data-level="1.2.5" data-path="demonstration-app.html"><a href="demonstration-app.html#server-input-observers"><i class="fa fa-check"></i><b>1.2.5</b> Server input-observers</a></li>
-<li class="chapter" data-level="1.2.6" data-path="demonstration-app.html"><a href="demonstration-app.html#server-reactive-expressions"><i class="fa fa-check"></i><b>1.2.6</b> Server reactive-expressions</a></li>
-<li class="chapter" data-level="1.2.7" data-path="demonstration-app.html"><a href="demonstration-app.html#server-outputs"><i class="fa fa-check"></i><b>1.2.7</b> Server outputs</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="2" data-path="dash.html"><a href="dash.html"><i class="fa fa-check"></i><b>2</b> Dash</a>
 <ul>
-<li class="chapter" data-level="2.1" data-path="principles-1.html"><a href="principles-1.html"><i class="fa fa-check"></i><b>2.1</b> Principles</a></li>
+<li class="chapter" data-level="2.1" data-path="principles-1.html"><a href="principles-1.html"><i class="fa fa-check"></i><b>2.1</b> Principles</a>
+<ul>
+<li class="chapter" data-level="2.1.1" data-path="principles-1.html"><a href="principles-1.html#everything-that-exists-is-a-component"><i class="fa fa-check"></i><b>2.1.1</b> Everything that exists is a component</a></li>
+<li class="chapter" data-level="2.1.2" data-path="principles-1.html"><a href="principles-1.html#everything-that-happens-is-a-callback"><i class="fa fa-check"></i><b>2.1.2</b> Everything that happens is a callback</a></li>
+<li class="chapter" data-level="2.1.3" data-path="principles-1.html"><a href="principles-1.html#server-cannot-store-state"><i class="fa fa-check"></i><b>2.1.3</b> Server cannot store state</a></li>
+<li class="chapter" data-level="2.1.4" data-path="principles-1.html"><a href="principles-1.html#use-json-or-base64"><i class="fa fa-check"></i><b>2.1.4</b> Use JSON or base64</a></li>
+</ul></li>
 <li class="chapter" data-level="2.2" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html"><i class="fa fa-check"></i><b>2.2</b> Demonstration app</a>
 <ul>
-<li class="chapter" data-level="2.2.1" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#helper-functions-1"><i class="fa fa-check"></i><b>2.2.1</b> Helper functions</a></li>
-<li class="chapter" data-level="2.2.2" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#layout"><i class="fa fa-check"></i><b>2.2.2</b> Layout</a></li>
-<li class="chapter" data-level="2.2.3" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#callbacks"><i class="fa fa-check"></i><b>2.2.3</b> Callbacks</a></li>
+<li class="chapter" data-level="2.2.1" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#description-1"><i class="fa fa-check"></i><b>2.2.1</b> Description</a></li>
+<li class="chapter" data-level="2.2.2" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#helper-functions-1"><i class="fa fa-check"></i><b>2.2.2</b> Helper functions</a></li>
+<li class="chapter" data-level="2.2.3" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#compmonent-layout"><i class="fa fa-check"></i><b>2.2.3</b> Compmonent layout</a></li>
+<li class="chapter" data-level="2.2.4" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#callbacks"><i class="fa fa-check"></i><b>2.2.4</b> Callbacks</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="observable.html"><a href="observable.html"><i class="fa fa-check"></i><b>3</b> Observable</a></li>
@@ -258,23 +267,20 @@ It provides the flexability to do a lot of things, but the price is that <em>you
 <ul>
 <li>all the DOM components (UI elements) in the layout.</li>
 <li>each connection between components is governed by a callback function that you provide.</li>
+<li>think in terms of JSON and base64-encoded data; this is what gets moved around.</li>
 </ul>
-<p>Here is the reactive graph for the demonstration app.</p>
-<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-6"></span>
-<img src="images/dash-aggregate-local.svg" alt="Reactivity diagram"  />
-<p class="caption">
-Figure 2.1: Reactivity diagram
-</p>
+<div id="everything-that-exists-is-a-component" class="section level3" number="2.1.1">
+<h3><span class="header-section-number">2.1.1</span> Everything that exists is a component</h3>
 </div>
-<p>Each rectangle is a layout component.
-Each circle is a callback function.</p>
-<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-7"></span>
-<img src="images/dash-legend.svg" alt="Legend"  />
-<p class="caption">
-Figure 2.2: Legend
-</p>
+<div id="everything-that-happens-is-a-callback" class="section level3" number="2.1.2">
+<h3><span class="header-section-number">2.1.2</span> Everything that happens is a callback</h3>
 </div>
-<p>Information cannot flow from one component to another unless it goes through a callback function.</p>
+<div id="server-cannot-store-state" class="section level3" number="2.1.3">
+<h3><span class="header-section-number">2.1.3</span> Server cannot store state</h3>
+</div>
+<div id="use-json-or-base64" class="section level3" number="2.1.4">
+<h3><span class="header-section-number">2.1.4</span> Use JSON or base64</h3>
+</div>
 </div>
             </section>
 
