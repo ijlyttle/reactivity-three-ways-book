@@ -34,7 +34,7 @@ It provides the flexability to do a lot of things, but the price is that *you* h
 
 ### Server cannot store state
 
-### Communicate using JSON or base64
+### Use JSON or base64
 
 ## Demonstration app
 
