@@ -24,7 +24,7 @@
 <meta name="author" content="Ian Lyttle" />
 
 
-<meta name="date" content="2022-02-20" />
+<meta name="date" content="2022-02-21" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -307,7 +307,7 @@ Your Shiny server-function will make much more sense, and be much easier to debu
 <h3><span class="header-section-number">1.1.2</span> Reactives vs. observers</h3>
 <p>Shiny server-functions provide two broad mechanisms for updating the state of your app:</p>
 <ul>
-<li><p><code>reactive()</code>: these return values, and should be used with pure functions.
+<li><p><code>reactive()</code>: these return values, and work well with pure functions.
 In other words, the returned value depends only on the reactive values it depends on.</p></li>
 <li><p><code>observe()</code>: there is no return value; instead, these cause side-effects.
 Very often, the effect is to change something in the UI, such as the choices in an input, or to render a plot.</p></li>
@@ -324,13 +324,14 @@ It is meant to support code like this, without a lot of quotes or namespace qual
 <p>In Shiny, variable (column) names in data frames are expressed as strings, rather than as bare variable-names.
 As well, in Shiny, we may want to <code>summarise()</code> an arbitrary set of variables.
 Thus, it can be a challenge to use tidyverse code in Shiny.</p>
-<p>It should not surprise us that the tidyverse folks offer tools to address this situation:</p>
+<p>It should not surprise us that the tidyverse offers tools to address this situation:</p>
 <ul>
 <li><code>&lt;tidy-select&gt;</code> is a set of tools to select variables within a data frame.
 Functions that use <code>&lt;tidy-select&gt;</code> include <code>dplyr::select()</code>, <code>tidyr::pivot_longer()</code>.
 Of particular use in Shiny are the selection helpers for strings: <code>dplyr::any_of()</code> and <code>dplyr::all_of()</code>.</li>
 <li><code>across()</code> lets us use a <code>&lt;tidy-select&gt;</code> specification in a data-masking function.
 More concretely, it lets us <code>group_by()</code> or <code>summarize()</code> over an arbitrary set of variables in a data frame.</li>
+<li>If you need to use data-masking with (by definition) a single variable, you can use subsetting with the <code>.data</code> pronoun, e.g. <code>ggplot2::aes(x = .data[[str_var_x]])</code>.</li>
 </ul>
 </div>
 </div>

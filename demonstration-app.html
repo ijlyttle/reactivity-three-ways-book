@@ -24,7 +24,7 @@
 <meta name="author" content="Ian Lyttle" />
 
 
-<meta name="date" content="2022-02-20" />
+<meta name="date" content="2022-02-21" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -273,22 +273,24 @@ Figure 1.1: Reactivity diagram
 </div>
 <p>Each <code>input</code> and <code>output</code> you see in the diagram is a part of the UI of the app.
 The reactive expressions, in this case: <code>inp</code> and <code>agg</code>, are found only in the app’s server-function.</p>
-<p>The solid lines indicate immediate downstream-evaluation if the upstream value changes; this is what we think of when we hear “reactivity”.
-The dashed lines indicate that downstream-evaluation does not immediate follow an upstream change.
-For example, the reactive-expression <code>agg</code> is updated only when the <code>button</code> is pushed.</p>
 <div class="figure"><span style="display:block;" id="fig:unnamed-chunk-2"></span>
 <img src="images/shiny-legend.svg" alt="Legend"  />
 <p class="caption">
 Figure 1.2: Legend
 </p>
 </div>
-<p>Spend some time to study the app, to make sure that these diagrams agree with your understanding of how the app operates.</p>
+<p>The solid lines indicate immediate downstream-evaluation if the upstream value changes; this is what we think of when we hear “reactivity”.
+The dashed lines indicate that downstream-evaluation does not immediate follow an upstream change.
+For example, the reactive-expression <code>agg</code> is updated only when the <code>button</code> is pushed.</p>
+<p>Spend some time to study the app, to make sure that these diagrams agree with your understanding of how the app operates.
+In the following sections, we’ll discuss how to implement in your Shiny code.</p>
 </div>
 <div id="helper-functions" class="section level3" number="1.2.2">
 <h3><span class="header-section-number">1.2.2</span> Helper functions</h3>
 <p>Before writing a Shiny app, I like to write out a set of non-reactive functions that will do the “heavy lifting”.
-To the extent possible, these are pure functions.</p>
-<p>To test things, we’ll use the <a href="https://allisonhorst.github.io/palmerpenguins/">palmerpenguins</a> dataset:</p>
+To the extent possible, these are pure functions; this will make it easier to test.
+I keep these functions in an <code>R</code> folder alongside my app; here’s a <a href="https://github.com/ijlyttle/reactivity-demo-shiny/blob/main/R/aggregate-local.R">link</a> to the actual code.</p>
+<p>Just like in the app, we’ll use the <a href="https://allisonhorst.github.io/palmerpenguins/">palmerpenguins</a> dataset:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="demonstration-app.html#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;palmerpenguins&quot;</span>)</span>
 <span id="cb4-2"><a href="demonstration-app.html#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;tibble&quot;</span>)</span>
 <span id="cb4-3"><a href="demonstration-app.html#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -307,11 +309,12 @@ To the extent possible, these are pure functions.</p>
 ##  9 Adelie  Torgersen           34.1          18.1               193        3475
 ## 10 Adelie  Torgersen           42            20.2               190        4250
 ## # … with 334 more rows, and 2 more variables: sex &lt;fct&gt;, year &lt;int&gt;</code></pre>
-<p>In fact, the first function is not even a function.
+<p>In fact, the first bit of code is not even a function.
 It is an enumeration of the choices for the aggregation function:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="demonstration-app.html#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># choices for aggregation functions</span></span>
 <span id="cb6-2"><a href="demonstration-app.html#cb6-2" aria-hidden="true" tabindex="-1"></a>agg_function_choices <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;mean&quot;</span>, <span class="st">&quot;min&quot;</span>, <span class="st">&quot;max&quot;</span>)</span></code></pre></div>
-<p>Next, a couple of functions that, given a data frame, returns the names of:</p>
+<p>We’ll use it in a few places, so I want to define it only once.</p>
+<p>Next, a couple of functions that, given a data frame, return the names of:</p>
 <ul>
 <li>numerical variables</li>
 <li>categorical variables</li>
@@ -334,7 +337,7 @@ This is a habit I learned following Hadley Wickham; basically:</p>
 It provides fewer opportunities for strange things to happen; I provide enough opportunities as it is.</p></li>
 <li><p>The function is more ready to be included in a package.</p></li>
 </ul>
-<p>The reason I write these functions is that I can test them without worrying about “reactive stuff”:</p>
+<p>As advertised, testing (or at least spot-verification) is straightforward:</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="demonstration-app.html#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cols_number</span>(penguins)</span></code></pre></div>
 <pre><code>## [1] &quot;bill_length_mm&quot;    &quot;bill_depth_mm&quot;     &quot;flipper_length_mm&quot;
 ## [4] &quot;body_mass_g&quot;       &quot;year&quot;</code></pre>
@@ -369,7 +372,7 @@ We turn the string into binding to a function using <code>get()</code>.</p></li>
 </ul>
 <p>For example if we were grouping by <code>"island"</code>, then aggregating over <code>"bill_length_mm"</code> and <code>"bill_depth_mm"</code> using <code>"mean"</code>,
 our interactive code might look like:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="demonstration-app.html#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;dplyr&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="demonstration-app.html#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;dplyr&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## 
 ## Attaching package: &#39;dplyr&#39;</code></pre>
 <pre><code>## The following objects are masked from &#39;package:stats&#39;:
@@ -378,12 +381,15 @@ our interactive code might look like:</p>
 <pre><code>## The following objects are masked from &#39;package:base&#39;:
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="demonstration-app.html#cb18-1" aria-hidden="true" tabindex="-1"></a>penguins <span class="sc">|&gt;</span></span>
-<span id="cb18-2"><a href="demonstration-app.html#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(island) <span class="sc">%&gt;%</span></span>
-<span id="cb18-3"><a href="demonstration-app.html#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
-<span id="cb18-4"><a href="demonstration-app.html#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">bill_length_mm =</span> <span class="fu">mean</span>(bill_length_mm, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb18-5"><a href="demonstration-app.html#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">bill_depth_mm =</span> <span class="fu">mean</span>(bill_depth_mm, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb18-6"><a href="demonstration-app.html#cb18-6" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="demonstration-app.html#cb18-1" aria-hidden="true" tabindex="-1"></a>aggregate_interactive <span class="ot">&lt;-</span> </span>
+<span id="cb18-2"><a href="demonstration-app.html#cb18-2" aria-hidden="true" tabindex="-1"></a>  penguins <span class="sc">|&gt;</span></span>
+<span id="cb18-3"><a href="demonstration-app.html#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(island) <span class="sc">|&gt;</span></span>
+<span id="cb18-4"><a href="demonstration-app.html#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb18-5"><a href="demonstration-app.html#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">bill_length_mm =</span> <span class="fu">mean</span>(bill_length_mm, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb18-6"><a href="demonstration-app.html#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">bill_depth_mm =</span> <span class="fu">mean</span>(bill_depth_mm, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb18-7"><a href="demonstration-app.html#cb18-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb18-8"><a href="demonstration-app.html#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="demonstration-app.html#cb18-9" aria-hidden="true" tabindex="-1"></a>aggregate_interactive</span></code></pre></div>
 <pre><code>## # A tibble: 3 × 3
 ##   island    bill_length_mm bill_depth_mm
 ##   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;
@@ -391,22 +397,19 @@ our interactive code might look like:</p>
 ## 2 Dream               44.2          18.3
 ## 3 Torgersen           39.0          18.4</code></pre>
 <p>We can use this result to help verify that our “string” version is working:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="demonstration-app.html#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">group_aggregate</span>(</span>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="demonstration-app.html#cb20-1" aria-hidden="true" tabindex="-1"></a>aggregate_string <span class="ot">&lt;-</span> <span class="fu">group_aggregate</span>(</span>
 <span id="cb20-2"><a href="demonstration-app.html#cb20-2" aria-hidden="true" tabindex="-1"></a>  penguins, </span>
 <span id="cb20-3"><a href="demonstration-app.html#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">str_group =</span> <span class="st">&quot;island&quot;</span>, </span>
 <span id="cb20-4"><a href="demonstration-app.html#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">str_agg =</span> <span class="fu">c</span>(<span class="st">&quot;bill_length_mm&quot;</span>, <span class="st">&quot;bill_depth_mm&quot;</span>),</span>
 <span id="cb20-5"><a href="demonstration-app.html#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">str_fn_agg =</span> <span class="st">&quot;mean&quot;</span></span>
-<span id="cb20-6"><a href="demonstration-app.html#cb20-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
-<pre><code>## # A tibble: 3 × 3
-##   island    bill_length_mm bill_depth_mm
-##   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;
-## 1 Biscoe              45.3          15.9
-## 2 Dream               44.2          18.3
-## 3 Torgersen           39.0          18.4</code></pre>
+<span id="cb20-6"><a href="demonstration-app.html#cb20-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-7"><a href="demonstration-app.html#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="demonstration-app.html#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(aggregate_interactive, aggregate_string)</span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
 </div>
 <div id="ui" class="section level3" number="1.2.3">
 <h3><span class="header-section-number">1.2.3</span> UI</h3>
-<p>The UI object is relatively straightforward; we use a <code>fluidPage()</code> with a narrower column for (mostly) inputs and a wider column for outputs.</p>
+<p>The UI object is relatively straightforward; we use a <code>fluidPage()</code> with a narrower column for inputs and a wider column for outputs.</p>
 <p>To give a clearer view of the high-level structure of the page, I replaced the code for the inputs and outputs with <code>...</code>:</p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="demonstration-app.html#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;shiny&quot;</span>)</span>
 <span id="cb22-2"><a href="demonstration-app.html#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -418,22 +421,18 @@ our interactive code might look like:</p>
 <span id="cb22-8"><a href="demonstration-app.html#cb22-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">wellPanel</span>(</span>
 <span id="cb22-9"><a href="demonstration-app.html#cb22-9" aria-hidden="true" tabindex="-1"></a>        <span class="fu">h3</span>(<span class="st">&quot;Aggregation&quot;</span>),</span>
 <span id="cb22-10"><a href="demonstration-app.html#cb22-10" aria-hidden="true" tabindex="-1"></a>        ...</span>
-<span id="cb22-11"><a href="demonstration-app.html#cb22-11" aria-hidden="true" tabindex="-1"></a>      ),</span>
-<span id="cb22-12"><a href="demonstration-app.html#cb22-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">wellPanel</span>(</span>
-<span id="cb22-13"><a href="demonstration-app.html#cb22-13" aria-hidden="true" tabindex="-1"></a>        <span class="fu">h3</span>(<span class="st">&quot;Aggregated data&quot;</span>),</span>
-<span id="cb22-14"><a href="demonstration-app.html#cb22-14" aria-hidden="true" tabindex="-1"></a>        ...    </span>
-<span id="cb22-15"><a href="demonstration-app.html#cb22-15" aria-hidden="true" tabindex="-1"></a>      )</span>
-<span id="cb22-16"><a href="demonstration-app.html#cb22-16" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb22-17"><a href="demonstration-app.html#cb22-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">column</span>(</span>
-<span id="cb22-18"><a href="demonstration-app.html#cb22-18" aria-hidden="true" tabindex="-1"></a>      <span class="at">width =</span> <span class="dv">8</span>,</span>
-<span id="cb22-19"><a href="demonstration-app.html#cb22-19" aria-hidden="true" tabindex="-1"></a>      <span class="fu">h3</span>(<span class="st">&quot;Input data&quot;</span>),</span>
-<span id="cb22-20"><a href="demonstration-app.html#cb22-20" aria-hidden="true" tabindex="-1"></a>      ...</span>
-<span id="cb22-21"><a href="demonstration-app.html#cb22-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">hr</span>(),</span>
-<span id="cb22-22"><a href="demonstration-app.html#cb22-22" aria-hidden="true" tabindex="-1"></a>      <span class="fu">h3</span>(<span class="st">&quot;Aggregated data&quot;</span>),</span>
-<span id="cb22-23"><a href="demonstration-app.html#cb22-23" aria-hidden="true" tabindex="-1"></a>      ...</span>
-<span id="cb22-24"><a href="demonstration-app.html#cb22-24" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb22-25"><a href="demonstration-app.html#cb22-25" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb22-26"><a href="demonstration-app.html#cb22-26" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<span id="cb22-11"><a href="demonstration-app.html#cb22-11" aria-hidden="true" tabindex="-1"></a>      )s</span>
+<span id="cb22-12"><a href="demonstration-app.html#cb22-12" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb22-13"><a href="demonstration-app.html#cb22-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">column</span>(</span>
+<span id="cb22-14"><a href="demonstration-app.html#cb22-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">width =</span> <span class="dv">8</span>,</span>
+<span id="cb22-15"><a href="demonstration-app.html#cb22-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">h3</span>(<span class="st">&quot;Input data&quot;</span>),</span>
+<span id="cb22-16"><a href="demonstration-app.html#cb22-16" aria-hidden="true" tabindex="-1"></a>      ...</span>
+<span id="cb22-17"><a href="demonstration-app.html#cb22-17" aria-hidden="true" tabindex="-1"></a>      <span class="fu">hr</span>(),</span>
+<span id="cb22-18"><a href="demonstration-app.html#cb22-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">h3</span>(<span class="st">&quot;Aggregated data&quot;</span>),</span>
+<span id="cb22-19"><a href="demonstration-app.html#cb22-19" aria-hidden="true" tabindex="-1"></a>      ...</span>
+<span id="cb22-20"><a href="demonstration-app.html#cb22-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-21"><a href="demonstration-app.html#cb22-21" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb22-22"><a href="demonstration-app.html#cb22-22" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <div id="inputs" class="section level4" number="1.2.3.1">
 <h4><span class="header-section-number">1.2.3.1</span> Inputs</h4>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="demonstration-app.html#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wellPanel</span>(</span>
@@ -461,31 +460,32 @@ our interactive code might look like:</p>
 <span id="cb23-23"><a href="demonstration-app.html#cb23-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">label =</span> <span class="st">&quot;Submit&quot;</span></span>
 <span id="cb23-24"><a href="demonstration-app.html#cb23-24" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb23-25"><a href="demonstration-app.html#cb23-25" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p>One of the inputs I would like to point out is for <code>input$cols_group</code>.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="demonstration-app.html#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">selectizeInput</span>(</span>
+<span id="cb24-2"><a href="demonstration-app.html#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">inputId =</span> <span class="st">&quot;cols_group&quot;</span>,</span>
+<span id="cb24-3"><a href="demonstration-app.html#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">label =</span> <span class="st">&quot;Grouping columns&quot;</span>,</span>
+<span id="cb24-4"><a href="demonstration-app.html#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">choices =</span> <span class="fu">c</span>(),</span>
+<span id="cb24-5"><a href="demonstration-app.html#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">multiple =</span> <span class="cn">TRUE</span></span>
+<span id="cb24-6"><a href="demonstration-app.html#cb24-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p>Note that the initial <code>choices</code> is supplied as an empty vector.
+Note also that the reactivity diagram for <code>cols_group</code> indicates that, we use an observer function to update this input.
+We’ll do this in the server function, where we update the <code>choices</code>.</p>
 </div>
 <div id="outputs" class="section level4" number="1.2.3.2">
 <h4><span class="header-section-number">1.2.3.2</span> Outputs</h4>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="demonstration-app.html#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">column</span>(</span>
-<span id="cb24-2"><a href="demonstration-app.html#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">8</span>,</span>
-<span id="cb24-3"><a href="demonstration-app.html#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">h3</span>(<span class="st">&quot;Input data&quot;</span>),</span>
-<span id="cb24-4"><a href="demonstration-app.html#cb24-4" aria-hidden="true" tabindex="-1"></a>  DT<span class="sc">::</span><span class="fu">DTOutput</span>(</span>
-<span id="cb24-5"><a href="demonstration-app.html#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">outputId =</span> <span class="st">&quot;table_inp&quot;</span></span>
-<span id="cb24-6"><a href="demonstration-app.html#cb24-6" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb24-7"><a href="demonstration-app.html#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">hr</span>(),</span>
-<span id="cb24-8"><a href="demonstration-app.html#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">h3</span>(<span class="st">&quot;Aggregated data&quot;</span>),</span>
-<span id="cb24-9"><a href="demonstration-app.html#cb24-9" aria-hidden="true" tabindex="-1"></a>  DT<span class="sc">::</span><span class="fu">DTOutput</span>(</span>
-<span id="cb24-10"><a href="demonstration-app.html#cb24-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">outputId =</span> <span class="st">&quot;table_agg&quot;</span></span>
-<span id="cb24-11"><a href="demonstration-app.html#cb24-11" aria-hidden="true" tabindex="-1"></a>  )      </span>
-<span id="cb24-12"><a href="demonstration-app.html#cb24-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
-<p>One of the inputs I would like to point out is for <code>input$cols_group</code>.</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="demonstration-app.html#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">selectizeInput</span>(</span>
-<span id="cb25-2"><a href="demonstration-app.html#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">inputId =</span> <span class="st">&quot;cols_group&quot;</span>,</span>
-<span id="cb25-3"><a href="demonstration-app.html#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">label =</span> <span class="st">&quot;Grouping columns&quot;</span>,</span>
-<span id="cb25-4"><a href="demonstration-app.html#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">choices =</span> <span class="fu">c</span>(),</span>
-<span id="cb25-5"><a href="demonstration-app.html#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">multiple =</span> <span class="cn">TRUE</span></span>
-<span id="cb25-6"><a href="demonstration-app.html#cb25-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
-<p>Note that the initial <code>choices</code> is supplied as an empty vector.
-Note also that the reactivity diagram for <code>cols_group</code> has a connection coming in from the “top”, rather than the side.
-This is to indicate that we will use a server function to update the <code>choices</code> for this input, using information from the <code>inp</code> data frame.</p>
+<p>The outputs are fairly strightforward; we are using <code>DT::DTOutput()</code> as placeholders for <a href="https://rstudio.github.io/DT/">DT DataTables</a>.</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="demonstration-app.html#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">column</span>(</span>
+<span id="cb25-2"><a href="demonstration-app.html#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">8</span>,</span>
+<span id="cb25-3"><a href="demonstration-app.html#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">h3</span>(<span class="st">&quot;Input data&quot;</span>),</span>
+<span id="cb25-4"><a href="demonstration-app.html#cb25-4" aria-hidden="true" tabindex="-1"></a>  DT<span class="sc">::</span><span class="fu">DTOutput</span>(</span>
+<span id="cb25-5"><a href="demonstration-app.html#cb25-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">outputId =</span> <span class="st">&quot;table_inp&quot;</span></span>
+<span id="cb25-6"><a href="demonstration-app.html#cb25-6" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb25-7"><a href="demonstration-app.html#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">hr</span>(),</span>
+<span id="cb25-8"><a href="demonstration-app.html#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">h3</span>(<span class="st">&quot;Aggregated data&quot;</span>),</span>
+<span id="cb25-9"><a href="demonstration-app.html#cb25-9" aria-hidden="true" tabindex="-1"></a>  DT<span class="sc">::</span><span class="fu">DTOutput</span>(</span>
+<span id="cb25-10"><a href="demonstration-app.html#cb25-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">outputId =</span> <span class="st">&quot;table_agg&quot;</span></span>
+<span id="cb25-11"><a href="demonstration-app.html#cb25-11" aria-hidden="true" tabindex="-1"></a>  )      </span>
+<span id="cb25-12"><a href="demonstration-app.html#cb25-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 </div>
 </div>
 <div id="server-function" class="section level3" number="1.2.4">
@@ -496,12 +496,11 @@ This is to indicate that we will use a server function to update the <code>choic
 <span id="cb26-3"><a href="demonstration-app.html#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># reactive expressions and values</span></span>
 <span id="cb26-4"><a href="demonstration-app.html#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># outputs</span></span>
 <span id="cb26-5"><a href="demonstration-app.html#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="er">}</span>  </span></code></pre></div>
-<p>For the demo app, I am not using output-observers; each of the other categories is discussed in a section.</p>
 <div id="input-observers" class="section level4" number="1.2.4.1">
 <h4><span class="header-section-number">1.2.4.1</span> Input observers</h4>
-<p>There are two inputs: <code>cols_group</code> and <code>cols_agg</code>, whose <code>choices</code> change according to the reactive-expression <code>inp()</code>.</p>
-<p>To make such a change, we use a Shiny <code>observer()</code>, which responds eagerly to any change to its reactive dependencies.
-An <code>observer()</code> does not return a value; instead, it causes a side-effect.
+<p>There are two inputs: <code>cols_group</code> and <code>cols_agg</code>, whose <code>choices</code> change when the input data-frame changes.</p>
+<p>To make such a change, we use a Shiny <code>observe()</code>, which runs when any of its reactive dependencies change.
+An <code>observe()</code> does not return a value; instead, it causes a side-effect.
 In this case, it changes an input element in the DOM.</p>
 <p>The observers are substantially similar, so I’ll show only <code>cols_group</code>:</p>
 <div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="demonstration-app.html#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">observe</span>({</span>
@@ -513,21 +512,21 @@ In this case, it changes an input element in the DOM.</p>
 <span id="cb27-7"><a href="demonstration-app.html#cb27-7" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb27-8"><a href="demonstration-app.html#cb27-8" aria-hidden="true" tabindex="-1"></a>}) </span></code></pre></div>
 <p>Note that one of our helper functions, <code>cols_category()</code>, makes an appearance.
-Now, the <code>choices</code> for the <code>cols_group</code> input are taken from the names of the categorical variables in the <code>inp()</code> data frame.</p>
+The <code>choices</code> for the <code>cols_group</code> input are updated according to the names of the categorical variables in the data frame returned by <code>inp()</code>.</p>
 </div>
 <div id="reactive-expressions" class="section level4" number="1.2.4.2">
 <h4><span class="header-section-number">1.2.4.2</span> Reactive expressions</h4>
 <p>This app uses two reactive expressions:</p>
 <ul>
 <li><code>inp()</code>, which returns the input data-frame.</li>
-<li><code>agg()</code>, which reutuns the aggregated data-frame.</li>
+<li><code>agg()</code>, which returns the aggregated data-frame.</li>
 </ul>
 <div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="demonstration-app.html#cb28-1" aria-hidden="true" tabindex="-1"></a>inp <span class="ot">&lt;-</span> </span>
 <span id="cb28-2"><a href="demonstration-app.html#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">reactive</span>({ </span>
 <span id="cb28-3"><a href="demonstration-app.html#cb28-3" aria-hidden="true" tabindex="-1"></a>    palmerpenguins<span class="sc">::</span>penguins</span>
 <span id="cb28-4"><a href="demonstration-app.html#cb28-4" aria-hidden="true" tabindex="-1"></a>  }) </span></code></pre></div>
 <p>For this app, we probably did not need to wrap <code>palmerpenguins::penguins</code> in a <code>reactive()</code>.
-I did this with future expansion in mind, where <code>inp()</code> could also return a data frame uploaded as a CSV file.</p>
+I did this with future expansion in mind, where <code>inp()</code> could also return a data frame according to a choice, or even a data frame parsed from an uploaded CSV file.</p>
 <p>The reactive expression for <code>agg()</code>, the aggregated data-frame, is more interesting:</p>
 <div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="demonstration-app.html#cb29-1" aria-hidden="true" tabindex="-1"></a>agg <span class="ot">&lt;-</span> </span>
 <span id="cb29-2"><a href="demonstration-app.html#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">reactive</span>({</span>
@@ -542,22 +541,22 @@ I did this with future expansion in mind, where <code>inp()</code> could also re
 <span id="cb29-11"><a href="demonstration-app.html#cb29-11" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb29-12"><a href="demonstration-app.html#cb29-12" aria-hidden="true" tabindex="-1"></a>  }) <span class="sc">|&gt;</span></span>
 <span id="cb29-13"><a href="demonstration-app.html#cb29-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bindEvent</span>(input<span class="sc">$</span>button, <span class="at">ignoreNULL =</span> <span class="cn">TRUE</span>, <span class="at">ignoreInit =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
-<p>First, we are using our <code>group_aggregate()</code> helper function here.
-For me, having tested it outside of Shiny helped me focus on getting the rest of the reactive expression working.</p>
-<p>Note that we have put some of the dependencies into a <code>reactive()</code> expression.
-We put a dependency on <code>input$button</code> into <code>bindEvent()</code>.
+<p>The first thing we do in the reactive is make sure that the value of <code>input$func_agg</code> is among the choices we specified.
+I’m sure you noticed that this is a redundant check.
+Although this is one place I strive for redundancy, I am careful to validate using the same values: <code>agg_function_choices</code>.
+You can read more about input validation in the <a href="https://mastering-shiny.org/scaling-security.html">security chapter</a> of Mastering Shiny.</p>
+<p>Then, we use our <code>group_aggregate()</code> helper function.
+For me, having tested it outside of Shiny helped me focus on getting the rest of the code working.</p>
+<p>The <code>reactive()</code> expression returns the data; the expression itself is piped to <code>bindEvent()</code>, which will run the <code>reactive()</code>, and return its value, only when the value of <code>input$button</code> changes.
 This is a relatively new pattern in Shiny; it appeared in v1.6.0.</p>
-<p><code>bindEvent()</code> will return the value returned by the <code>reactive()</code>.
-However, it will evaluate the <code>reactive()</code> only when there is a change to <code>input$button</code>.</p>
+<p><code>bindEvent()</code> has a couple of options:</p>
 <ul>
 <li><code>ignoreNULL = FALSE</code>: the <code>reactive()</code> is not evaluated if <code>input$button</code> is zero.</li>
 <li><code>ignoreInit = FALSE</code>: the <code>reactive()</code> is not evaluated when the app is first initialized.</li>
 </ul>
-<p>In other words, we have to wait for the button-click.</p>
-<p>As well, we are using <code>req()</code> to validate the input.
-You may remember that this is validated also in our helper function.
-I realize that we are violating “Don’t Repeat Yourself”; I think that security merits redundancy.
-You can read more about this in the <a href="https://mastering-shiny.org/scaling-security.html">security chapter</a> of Mastering Shiny.</p>
+<p>In this case, the <code>reactive()</code> is evaluated only in response to a button-click.
+This can be a useful pattern if the <code>reactive()</code> contains a long-running computation, or a call to an external resource.
+You may also be interested in Shiny’s <code>bindCache()</code> function.</p>
 </div>
 <div id="outputs-1" class="section level4" number="1.2.4.3">
 <h4><span class="header-section-number">1.2.4.3</span> Outputs</h4>
