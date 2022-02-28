@@ -33,3 +33,5 @@ callbacks
 observable
 stray-thoughts
 field-guide-to-python
+python-installation
+virtual-environment

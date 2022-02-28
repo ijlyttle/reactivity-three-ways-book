@@ -24,7 +24,7 @@
 <meta name="author" content="Ian Lyttle" />
 
 
-<meta name="date" content="2022-02-21" />
+<meta name="date" content="2022-02-28" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -241,7 +241,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="3" data-path="observable.html"><a href="observable.html"><i class="fa fa-check"></i><b>3</b> Observable</a></li>
 <li class="appendix"><span><b>Appendix</b></span></li>
 <li class="chapter" data-level="A" data-path="stray-thoughts.html"><a href="stray-thoughts.html"><i class="fa fa-check"></i><b>A</b> Stray Thoughts</a></li>
-<li class="chapter" data-level="B" data-path="field-guide-to-python.html"><a href="field-guide-to-python.html"><i class="fa fa-check"></i><b>B</b> Field Guide to Python</a></li>
+<li class="chapter" data-level="B" data-path="field-guide-to-python.html"><a href="field-guide-to-python.html"><i class="fa fa-check"></i><b>B</b> Field Guide to Python</a>
+<ul>
+<li class="chapter" data-level="B.1" data-path="python-installation.html"><a href="python-installation.html"><i class="fa fa-check"></i><b>B.1</b> Python installation</a></li>
+<li class="chapter" data-level="B.2" data-path="virtual-environment.html"><a href="virtual-environment.html"><i class="fa fa-check"></i><b>B.2</b> Virtual Environment</a></li>
+</ul></li>
 </ul>
 
       </nav>
@@ -264,13 +268,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="dash.html#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;reticulate&quot;</span>)</span>
 <span id="cb31-2"><a href="dash.html#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;here&quot;</span>)</span></code></pre></div>
 <pre><code>## here() starts at /home/runner/work/reactivity-three-ways-book/reactivity-three-ways-book</code></pre>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="dash.html#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">use_virtualenv</span>(<span class="fu">here</span>(<span class="st">&quot;env&quot;</span>))</span>
-<span id="cb33-2"><a href="dash.html#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="co"># py_config()</span></span></code></pre></div>
-<div class="sourceCode" id="cb34"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb34-1"><a href="dash.html#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb34-2"><a href="dash.html#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> palmerpenguins <span class="im">import</span> load_penguins</span>
-<span id="cb34-3"><a href="dash.html#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-4"><a href="dash.html#cb34-4" aria-hidden="true" tabindex="-1"></a>penguins <span class="op">=</span> load_penguins()</span>
-<span id="cb34-5"><a href="dash.html#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(penguins)</span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb33-1"><a href="dash.html#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb33-2"><a href="dash.html#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> palmerpenguins <span class="im">import</span> load_penguins</span>
+<span id="cb33-3"><a href="dash.html#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="dash.html#cb33-4" aria-hidden="true" tabindex="-1"></a>penguins <span class="op">=</span> load_penguins()</span>
+<span id="cb33-5"><a href="dash.html#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(penguins)</span></code></pre></div>
 <pre><code>##        species     island  bill_length_mm  ...  body_mass_g     sex  year
 ## 0       Adelie  Torgersen            39.1  ...       3750.0    male  2007
 ## 1       Adelie  Torgersen            39.5  ...       3800.0  female  2007
