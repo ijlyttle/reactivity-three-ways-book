@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>B.2 Virtual Environment | Data-Science Reactivity: Three Ways</title>
-  <meta name="description" content="B.2 Virtual Environment | Data-Science Reactivity: Three Ways" />
+  <title>B.2 Project management | Data-Science Reactivity: Three Ways</title>
+  <meta name="description" content="B.2 Project management | Data-Science Reactivity: Three Ways" />
   <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="B.2 Virtual Environment | Data-Science Reactivity: Three Ways" />
+  <meta property="og:title" content="B.2 Project management | Data-Science Reactivity: Three Ways" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="B.2 Virtual Environment | Data-Science Reactivity: Three Ways" />
+  <meta name="twitter:title" content="B.2 Project management | Data-Science Reactivity: Three Ways" />
   
   
   
@@ -244,7 +244,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="B" data-path="field-guide-to-python.html"><a href="field-guide-to-python.html"><i class="fa fa-check"></i><b>B</b> Field Guide to Python</a>
 <ul>
 <li class="chapter" data-level="B.1" data-path="python-installation.html"><a href="python-installation.html"><i class="fa fa-check"></i><b>B.1</b> Python installation</a></li>
-<li class="chapter" data-level="B.2" data-path="virtual-environment.html"><a href="virtual-environment.html"><i class="fa fa-check"></i><b>B.2</b> Virtual Environment</a></li>
+<li class="chapter" data-level="B.2" data-path="project-management.html"><a href="project-management.html"><i class="fa fa-check"></i><b>B.2</b> Project management</a>
+<ul>
+<li class="chapter" data-level="B.2.1" data-path="project-management.html"><a href="project-management.html#git"><i class="fa fa-check"></i><b>B.2.1</b> Git</a></li>
+<li class="chapter" data-level="B.2.2" data-path="project-management.html"><a href="project-management.html#virtual-environment"><i class="fa fa-check"></i><b>B.2.2</b> Virtual Environment</a></li>
+</ul></li>
 </ul></li>
 </ul>
 
@@ -263,17 +267,59 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="virtual-environment" class="section level2" number="5.2">
-<h2><span class="header-section-number">B.2</span> Virtual Environment</h2>
-<p>Virtual Environment</p>
-<p>Pip install</p>
-<p>Imports</p>
-<div class="sourceCode" id="cb45"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb45-1"><a href="virtual-environment.html#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> foo</span>
-<span id="cb45-2"><a href="virtual-environment.html#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> foo <span class="im">as</span> bar</span>
-<span id="cb45-3"><a href="virtual-environment.html#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> foo <span class="im">import</span> bar</span></code></pre></div>
-<p><code>requirements.txt</code></p>
-<p><a href="https://rstudio.github.io/reticulate/articles/python_primer.html" class="uri">https://rstudio.github.io/reticulate/articles/python_primer.html</a></p>
+<div id="project-management" class="section level2" number="5.2">
+<h2><span class="header-section-number">B.2</span> Project management</h2>
+<div id="git" class="section level3" number="5.2.1">
+<h3><span class="header-section-number">B.2.1</span> Git</h3>
+<p>If you are creating your project directory from scratch, you will likely want to initialize a git repository in your newly-created directory:</p>
+<pre><code>&gt; git init</code></pre>
+<p>You will also want a <code>.gitignore</code> file for your project.
+Here’s my <code>.gitignore</code> file for the Dash demo app; I include some RStudio stuff for if/when I open the project in RStudio.</p>
+<pre><code># RStudio stuff
+.Rproj.user
+*.Rproj
+.Rhistory
+.Rdata
 
+# virtual environment
+venv
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class</code></pre>
+<p>You may wish to adapt the virtual-environment entry to your situation.</p>
+</div>
+<div id="virtual-environment" class="section level3" number="5.2.2">
+<h3><span class="header-section-number">B.2.2</span> Virtual Environment</h3>
+<p>Python virtual environments are used to manage dependencies so that they are local to a project.
+This is a different from the classic R idea of having a single library of packages used for all projects.</p>
+<p>The idea of a project-based is also used in JavaScript (e.g. npm, yarn) and is gaining popularity in R with the <a href="https://rstudio.github.io/renv/index.html">renv</a> package.
+In fact, this book is build using renv.</p>
+<p>The goal here is to show you how to establish and manage a virtual environment for a Dash project.</p>
+<p>In your newly-created project directory, from the terminal command-line:</p>
+<pre><code>&gt; python -m venv ./venv</code></pre>
+<p>This creates your Python virtual environment by creating a directory in the root of your project called <code>venv</code>.
+The name of the directory is determined by the last argument, in this case <code>./venv</code>.
+There are a number of “standard” ways to name virtual environments; <code>venv</code> is one of them.
+It’s really up to you and your collaborators.</p>
+<p>The important thing is to make sure that you have a <code>.gitignore</code> entry for the virtual-environment directory.</p>
+<p>Next, let’s activate the environment.
+This tells your terminal that <em>this</em> is what you want to run when you invoke <code>python</code>.</p>
+<p>In your project directory, from the terminal command-line:</p>
+<pre><code>&gt; source ./venv/bin/activate</code></pre>
+<p>At this point, you might want to install packages into your virtual enviromment.
+Which packages will depend on the particulars of your project, but you can start with Dash:</p>
+<pre><code>&gt; pip install dash</code></pre>
+<p>Every so often, you will want to catpure which packages have been installed into your virtual environment:</p>
+<pre><code>&gt; pip freeze &gt; requirements.txt</code></pre>
+<p>You will want to commit <code>requirements.txt</code> to your git repository, as this contains the instructions for someone to reproduce your virtual environment.</p>
+<p>To reproduce it, a colleague (perhaps you!) will have to create and activate a virtual environment, then:</p>
+<pre><code>&gt; pip install -r requirements.txt</code></pre>
+<p>These are the very basics for how to set up and maintain a Python project.
+As you gain experience, you will likely adpat these ideas to your evolving needs.</p>
+
+</div>
 </div>
 <!-- </div> -->
             </section>

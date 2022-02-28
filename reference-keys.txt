@@ -34,4 +34,6 @@ observable
 stray-thoughts
 field-guide-to-python
 python-installation
+project-management
+git
 virtual-environment
