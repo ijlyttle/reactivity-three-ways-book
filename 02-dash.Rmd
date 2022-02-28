@@ -3,8 +3,6 @@
 ```{r}
 library("reticulate")
 library("here")
-use_virtualenv(here("env"))
-# py_config()
 ```
 
 ```{python}

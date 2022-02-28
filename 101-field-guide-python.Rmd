@@ -1,6 +1,18 @@
 # Field Guide to Python
 
-Version 
+To make a Dash app, you need to get up-and-running in Python. 
+As first steps, this means:
+
+- making sure you have a fairly recent version of Python. 
+  At present, I am using 3.8.9.
+
+- setting up a virtual environment for your project.
+
+## Python installation
+
+To 
+
+## Virtual Environment
 
 Virtual Environment
 
@@ -15,3 +27,5 @@ from foo import bar
 ```
 
 `requirements.txt`
+
+https://rstudio.github.io/reticulate/articles/python_primer.html

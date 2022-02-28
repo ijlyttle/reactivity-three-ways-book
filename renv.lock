@@ -9,9 +9,9 @@
     ]
   },
   "Python": {
-    "Version": "3.8.9",
+    "Version": "3.10.2",
     "Type": "virtualenv",
-    "Name": "./env"
+    "Name": "./venv"
   },
   "Packages": {
     "Matrix": {
