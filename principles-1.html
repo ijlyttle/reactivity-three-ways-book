@@ -269,14 +269,26 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="principles-1" class="section level2" number="2.1">
 <h2><span class="header-section-number">2.1</span> Principles</h2>
-<p>In Shiny, the reactive graph (what depends on what) is inferred using the code in reactive expressions.</p>
-<p>In Dash, it is explicit, which is a mixed blessing.
-It provides the flexability to do a lot of things, but the price is that <em>you</em> have to specify:</p>
+<p>Both Shiny and Dash use the idea of a reactive graph, which indicates what things depend on what other things:</p>
+<ul>
+<li><p>In Shiny, the reactive graph (what depends on what) is inferred using the code in reactive expressions.</p></li>
+<li><p>In Dash, it is explicit, which is a mixed blessing.</p></li>
+</ul>
+<p>For Dash, this explicitness provides the flexibility to do a lot of things, but the price is that <em>you</em> have to specify:</p>
 <ul>
 <li>all the DOM components (UI elements) in the layout.</li>
 <li>each connection between components is governed by a callback function that you provide.</li>
-<li>think in terms of JSON and base64-encoded data; this is what gets moved around.</li>
 </ul>
+<p>This is substantially similar to Shiny part of the Dash app is used to define the UI; the rest defines what happens on the server.</p>
+<p>However, there are a couple of big considerations:</p>
+<ul>
+<li>the state of the app <strong>cannot</strong> be stored in the server application.</li>
+<li>it is easiest to move you data around using JSON and base64-encoded data.</li>
+</ul>
+<p>This is different from Shiny, which stores the state of the application in the server function.
+Further, Shiny manages the serialization/de-serialization of data to/from the UI; with Dash, you have to manage that yourself.</p>
+<p>These are not insurmountable obstacles, as well see in the rest of this section.
+For example, one way to store the state is in the UI of the app.</p>
 <div id="everything-that-exists-is-a-component" class="section level3" number="2.1.1">
 <h3><span class="header-section-number">2.1.1</span> Everything that exists is a component</h3>
 </div>
