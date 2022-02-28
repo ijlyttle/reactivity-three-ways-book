@@ -1,30 +1,41 @@
 # Dash
 
-```{r}
-library("reticulate")
-library("here")
-```
+Although it is a gross oversimplification, at first glance Dash seems like Python's answer to Shiny.
 
-```{python}
-import pandas as pd
-from palmerpenguins import load_penguins
+Accordingly, the goals of this chapter are:
 
-penguins = load_penguins()
-print(penguins)
-```
-
-This may be an oversimplification, but Dash seems like Python's answer to Shiny.
+ - to show the ways the Dash is like Shiny.
+ - to introduce the ways Dash is different from Shiny.
+ - to help you form strategies for how to "think" about Dash.
+ 
+To provide some context, we will use this [demonstration app](https://aggregate-local.herokuapp.com), and examine [its code](https://github.com/ijlyttle/reactivity-demo-dash).
 
 ## Principles
 
-In Shiny, the reactive graph (what depends on what) is inferred using the code in reactive expressions.
+Both Shiny and Dash use the idea of a reactive graph, which indicates what things depend on what other things:
 
-In Dash, it is explicit, which is a mixed blessing. 
-It provides the flexability to do a lot of things, but the price is that *you* have to specify:
+ - In Shiny, the reactive graph (what depends on what) is inferred using the code in reactive expressions.
 
-- all the DOM components (UI elements) in the layout.
-- each connection between components is governed by a callback function that you provide.
-- think in terms of JSON and base64-encoded data; this is what gets moved around.
+ - In Dash, it is explicit, which is a mixed blessing. 
+   
+   
+For Dash, this explicitness provides the flexibility to do a lot of things, but the price is that *you* have to specify:
+
+  - all the DOM components (UI elements) in the layout.
+  - each connection between components is governed by a callback function that you provide.
+
+This is substantially similar to Shiny part of the Dash app is used to define the UI; the rest defines what happens on the server.
+
+However, there are a couple of big considerations:
+
+  - the state of the app **cannot** be stored in the server application.
+  - it is easiest to move you data around using JSON and base64-encoded data.
+
+This is different from Shiny, which stores the state of the application in the server function. 
+Further, Shiny manages the serialization/de-serialization of data to/from the UI; with Dash, you have to manage that yourself.
+
+These are not insurmountable obstacles, as well see in the rest of this section. 
+For example, one way to store the state is in the UI of the app.
 
 ### Everything that exists is a component
 
@@ -54,6 +65,19 @@ knitr::include_graphics("images/dash-legend.svg")
 Information cannot flow from one component to another unless it goes through a callback function.
 
 ### Helper functions
+
+```{r}
+# using only to demonstrate code; not used in Python Dash.
+library("reticulate")
+```
+
+```{python}
+import pandas as pd
+from palmerpenguins import load_penguins
+
+penguins = load_penguins()
+print(penguins)
+```
 
 ```{python}
 penguins_records = penguins.to_dict('records')
