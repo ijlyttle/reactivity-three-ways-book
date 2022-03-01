@@ -24,7 +24,7 @@ For Dash, this explicitness provides the flexibility to do a lot of things, but 
   - all the DOM components (UI elements) in the layout.
   - each connection between components is governed by a callback function that you provide.
 
-This is substantially similar to Shiny part of the Dash app is used to define the UI; the rest defines what happens on the server.
+This is substantially similar to Shiny: part of the Dash app is used to define the UI; the rest defines what happens on the server.
 
 However, there are a couple of big considerations:
 
@@ -39,11 +39,92 @@ For example, one way to store the state is in the UI of the app.
 
 ### Everything that exists is a component
 
+These first two subsections are an homage to the famous John Chambers quotes:
+
+> To understand computations in R, two slogans are helpful:
+>
+>  - Everything that exists is an object.
+>  - Everything that happens is a function call.
+
+Similarly, everything that exists on Dash app's web page is a component.
+
+As we'll see in the demo, a Dash app contains a layout that you specify:
+
+```{python, eval=FALSE}
+app.layout = html.div(...)
+```
+
+You need to fill in the `...`.
+A component might be a straightforward HTML element, or it might be a Dash component, where you define the attributes.
+
+The `html` object (imported from the `dash` package) behaves very similarly to R's htmltools package; they are both based on the HTML5 spec.
+
+We'll see more in the demo, but here's an example of a Dash component:
+
+```{python eval=FALSE}
+dcc.Dropdown(id='cols-group', multi=True)
+```
+
+This is a [dropdown component](https://dash.plotly.com/dash-core-components/dropdown); we define the `id` and `multi` properties at definition.
+In this case, we don't define the `options` or `value` properties. We'll update the `options` dynamically, and let the user set the `value`.
+
+Like other components, dropdowns have a number of [properties](https://dash.plotly.com/dash-core-components/dropdown#dropdown-properties); we can set them either at initialization, as we did here, or we can set them using a callback.
+
+Talk about the DOM.
+
 ### Everything that happens is a callback
+
+If you want something to happen in a Dash app, it has to happen in a callback function.
+Dash lets you write callbacks using Python. 
+It also lets you write callbacks in JavaScript, but that gets beyond the scope of this book.
+
+We'll see this in more detail in the demo app, but a callback is a standard Python function with a decorator:
+
+```{python eval=FALSE}
+@app.callback(Output('cols-group', 'options'),
+              Input('inp', 'data'))
+def update_cols_group(data_records):
+    return cols_choice(data_records, 'object')
+```
+
+The decorator, `@app.callback(...)` tells Dash which layout components to map to the function's inputs and outputs.
+When an `Input()` changes:
+
+ - the browser calls the Dash server to run the callback function.
+ - the Dash server runs the Python function.
+ - the Dash server sends the `Output()` to the browser.
+ - the browser updates the DOM.
 
 ### Server cannot store state
 
+Managing state is a pain.
+However, by remaining stateless, Dash is able to easily scale to as many server instances it needs because it does not matter which instance of a callback-function responds to which browser (user) making the call.
+
+Coming from Shiny, this might seem like a show-stopper; we are used to manipulating, then storing data using the server side of an app.
+But there are ways around this. 
+It's not that you can't store the state - you just can't store it "here". 
+Your options are:
+
+ - store data in the DOM, then send it when needed.
+ - store data in an external database, or the like.
+
+We'll use the first option here. 
+Here's one of the components in our layout:
+
+```{python eval=FALSE}
+dcc.Store(id='inp', data=penguins.to_dict('records'))
+```
+
+Note that this component is initialized using the `penguins` data, but that we are using pandas' `to_dict()` method.
+This is because the component will receive the data using JSON; it is stored in the DOM as a JavaScript object.
+
 ### Use JSON or base64
+
+The final thing to keep in mind is that when we communicate data between the browser DOM and the callback functions, it does not use native Python objects. Instead, from the Python callback-functions' perspective, data is serialized to JSON when sent to the DOM, and deserialized from JSON when received from the DOM. 
+
+For Python dictionaries and lists containing numbers and strings, the serialization process is implied. For data frames, you have to be specific, using `to_dict()` or `from_dict()`.
+
+The other option is to use base64 encoding; I have seen this used for uploading/downloading text files, e.g. CSV or JSON files.
 
 ## Demonstration app
 
