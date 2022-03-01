@@ -24,7 +24,7 @@
 <meta name="author" content="Ian Lyttle" />
 
 
-<meta name="date" content="2022-02-28" />
+<meta name="date" content="2022-03-01" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -279,7 +279,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li>all the DOM components (UI elements) in the layout.</li>
 <li>each connection between components is governed by a callback function that you provide.</li>
 </ul>
-<p>This is substantially similar to Shiny part of the Dash app is used to define the UI; the rest defines what happens on the server.</p>
+<p>This is substantially similar to Shiny: part of the Dash app is used to define the UI; the rest defines what happens on the server.</p>
 <p>However, there are a couple of big considerations:</p>
 <ul>
 <li>the state of the app <strong>cannot</strong> be stored in the server application.</li>
@@ -291,15 +291,69 @@ Further, Shiny manages the serialization/de-serialization of data to/from the UI
 For example, one way to store the state is in the UI of the app.</p>
 <div id="everything-that-exists-is-a-component" class="section level3" number="2.1.1">
 <h3><span class="header-section-number">2.1.1</span> Everything that exists is a component</h3>
+<p>These first two subsections are an homage to the famous John Chambers quotes:</p>
+<blockquote>
+<p>To understand computations in R, two slogans are helpful:</p>
+<ul>
+<li>Everything that exists is an object.</li>
+<li>Everything that happens is a function call.</li>
+</ul>
+</blockquote>
+<p>Similarly, everything that exists on Dash app’s web page is a component.</p>
+<p>As we’ll see in the demo, a Dash app contains a layout that you specify:</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb31-1"><a href="principles-1.html#cb31-1" aria-hidden="true" tabindex="-1"></a>app.layout <span class="op">=</span> html.div(...)</span></code></pre></div>
+<p>You need to fill in the <code>...</code>.
+A component might be a straightforward HTML element, or it might be a Dash component, where you define the attributes.</p>
+<p>The <code>html</code> object (imported from the <code>dash</code> package) behaves very similarly to R’s htmltools package; they are both based on the HTML5 spec.</p>
+<p>We’ll see more in the demo, but here’s an example of a Dash component:</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb32-1"><a href="principles-1.html#cb32-1" aria-hidden="true" tabindex="-1"></a>dcc.Dropdown(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;cols-group&#39;</span>, multi<span class="op">=</span><span class="va">True</span>)</span></code></pre></div>
+<p>This is a <a href="https://dash.plotly.com/dash-core-components/dropdown">dropdown component</a>; we define the <code>id</code> and <code>multi</code> properties at definition.
+In this case, we don’t define the <code>options</code> or <code>value</code> properties. We’ll update the <code>options</code> dynamically, and let the user set the <code>value</code>.</p>
+<p>Like other components, dropdowns have a number of <a href="https://dash.plotly.com/dash-core-components/dropdown#dropdown-properties">properties</a>; we can set them either at initialization, as we did here, or we can set them using a callback.</p>
+<p>Talk about the DOM.</p>
 </div>
 <div id="everything-that-happens-is-a-callback" class="section level3" number="2.1.2">
 <h3><span class="header-section-number">2.1.2</span> Everything that happens is a callback</h3>
+<p>If you want something to happen in a Dash app, it has to happen in a callback function.
+Dash lets you write callbacks using Python.
+It also lets you write callbacks in JavaScript, but that gets beyond the scope of this book.</p>
+<p>We’ll see this in more detail in the demo app, but a callback is a standard Python function with a decorator:</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb33-1"><a href="principles-1.html#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.callback</span>(Output(<span class="st">&#39;cols-group&#39;</span>, <span class="st">&#39;options&#39;</span>),</span>
+<span id="cb33-2"><a href="principles-1.html#cb33-2" aria-hidden="true" tabindex="-1"></a>              Input(<span class="st">&#39;inp&#39;</span>, <span class="st">&#39;data&#39;</span>))</span>
+<span id="cb33-3"><a href="principles-1.html#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> update_cols_group(data_records):</span>
+<span id="cb33-4"><a href="principles-1.html#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cols_choice(data_records, <span class="st">&#39;object&#39;</span>)</span></code></pre></div>
+<p>The decorator, <code>@app.callback(...)</code> tells Dash which layout components to map to the function’s inputs and outputs.
+When an <code>Input()</code> changes:</p>
+<ul>
+<li>the browser calls the Dash server to run the callback function.</li>
+<li>the Dash server runs the Python function.</li>
+<li>the Dash server sends the <code>Output()</code> to the browser.</li>
+<li>the browser updates the DOM.</li>
+</ul>
 </div>
 <div id="server-cannot-store-state" class="section level3" number="2.1.3">
 <h3><span class="header-section-number">2.1.3</span> Server cannot store state</h3>
+<p>Managing state is a pain.
+However, by remaining stateless, Dash is able to easily scale to as many server instances it needs because it does not matter which instance of a callback-function responds to which browser (user) making the call.</p>
+<p>Coming from Shiny, this might seem like a show-stopper; we are used to manipulating, then storing data using the server side of an app.
+But there are ways around this.
+It’s not that you can’t store the state - you just can’t store it “here”.
+Your options are:</p>
+<ul>
+<li>store data in the DOM, then send it when needed.</li>
+<li>store data in an external database, or the like.</li>
+</ul>
+<p>We’ll use the first option here.
+Here’s one of the components in our layout:</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb34-1"><a href="principles-1.html#cb34-1" aria-hidden="true" tabindex="-1"></a>dcc.Store(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;inp&#39;</span>, data<span class="op">=</span>penguins.to_dict(<span class="st">&#39;records&#39;</span>))</span></code></pre></div>
+<p>Note that this component is initialized using the <code>penguins</code> data, but that we are using pandas’ <code>to_dict()</code> method.
+This is because the component will receive the data using JSON; it is stored in the DOM as a JavaScript object.</p>
 </div>
 <div id="use-json-or-base64" class="section level3" number="2.1.4">
 <h3><span class="header-section-number">2.1.4</span> Use JSON or base64</h3>
+<p>The final thing to keep in mind is that when we communicate data between the browser DOM and the callback functions, it does not use native Python objects. Instead, from the Python callback-functions’ perspective, data is serialized to JSON when sent to the DOM, and deserialized from JSON when received from the DOM.</p>
+<p>For Python dictionaries and lists containing numbers and strings, the serialization process is implied. For data frames, you have to be specific, using <code>to_dict()</code> or <code>from_dict()</code>.</p>
+<p>The other option is to use base64 encoding; I have seen this used for uploading/downloading text files, e.g. CSV or JSON files.</p>
 </div>
 </div>
             </section>

@@ -24,7 +24,7 @@
 <meta name="author" content="Ian Lyttle" />
 
 
-<meta name="date" content="2022-02-28" />
+<meta name="date" content="2022-03-01" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -272,7 +272,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="description-1" class="section level3" number="2.2.1">
 <h3><span class="header-section-number">2.2.1</span> Description</h3>
 <p>Here is the reactive graph for the demonstration app.</p>
-<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-4"></span>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-8"></span>
 <img src="images/dash-aggregate-local.svg" alt="Reactivity diagram"  />
 <p class="caption">
 Figure 2.1: Reactivity diagram
@@ -280,7 +280,7 @@ Figure 2.1: Reactivity diagram
 </div>
 <p>Each rectangle is a layout component.
 Each circle is a callback function.</p>
-<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-5"></span>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-9"></span>
 <img src="images/dash-legend.svg" alt="Legend"  />
 <p class="caption">
 Figure 2.2: Legend
@@ -290,13 +290,13 @@ Figure 2.2: Legend
 </div>
 <div id="helper-functions-1" class="section level3" number="2.2.2">
 <h3><span class="header-section-number">2.2.2</span> Helper functions</h3>
-<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="demonstration-app-1.html#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># using only to demonstrate code; not used in Python Dash.</span></span>
-<span id="cb31-2"><a href="demonstration-app-1.html#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;reticulate&quot;</span>)</span></code></pre></div>
-<div class="sourceCode" id="cb32"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb32-1"><a href="demonstration-app-1.html#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb32-2"><a href="demonstration-app-1.html#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> palmerpenguins <span class="im">import</span> load_penguins</span>
-<span id="cb32-3"><a href="demonstration-app-1.html#cb32-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-4"><a href="demonstration-app-1.html#cb32-4" aria-hidden="true" tabindex="-1"></a>penguins <span class="op">=</span> load_penguins()</span>
-<span id="cb32-5"><a href="demonstration-app-1.html#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(penguins)</span></code></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="demonstration-app-1.html#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># using only to demonstrate code; not used in Python Dash.</span></span>
+<span id="cb35-2"><a href="demonstration-app-1.html#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;reticulate&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb36-1"><a href="demonstration-app-1.html#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb36-2"><a href="demonstration-app-1.html#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> palmerpenguins <span class="im">import</span> load_penguins</span>
+<span id="cb36-3"><a href="demonstration-app-1.html#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="demonstration-app-1.html#cb36-4" aria-hidden="true" tabindex="-1"></a>penguins <span class="op">=</span> load_penguins()</span>
+<span id="cb36-5"><a href="demonstration-app-1.html#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(penguins)</span></code></pre></div>
 <pre><code>##        species     island  bill_length_mm  ...  body_mass_g     sex  year
 ## 0       Adelie  Torgersen            39.1  ...       3750.0    male  2007
 ## 1       Adelie  Torgersen            39.5  ...       3800.0  female  2007
@@ -311,48 +311,48 @@ Figure 2.2: Legend
 ## 343  Chinstrap      Dream            50.2  ...       3775.0  female  2009
 ## 
 ## [344 rows x 8 columns]</code></pre>
-<div class="sourceCode" id="cb34"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb34-1"><a href="demonstration-app-1.html#cb34-1" aria-hidden="true" tabindex="-1"></a>penguins_records <span class="op">=</span> penguins.to_dict(<span class="st">&#39;records&#39;</span>)</span></code></pre></div>
-<div class="sourceCode" id="cb35"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb35-1"><a href="demonstration-app-1.html#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cols_choice (data_records, include):</span>
-<span id="cb35-2"><a href="demonstration-app-1.html#cb35-2" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> pd.DataFrame.from_dict(data_records)</span>
-<span id="cb35-3"><a href="demonstration-app-1.html#cb35-3" aria-hidden="true" tabindex="-1"></a>    col_names <span class="op">=</span> df.select_dtypes(include<span class="op">=</span>include).columns.to_list()</span>
-<span id="cb35-4"><a href="demonstration-app-1.html#cb35-4" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb35-5"><a href="demonstration-app-1.html#cb35-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [{<span class="st">&#39;label&#39;</span>: i, <span class="st">&#39;value&#39;</span>: i} <span class="cf">for</span> i <span class="kw">in</span> col_names]</span>
-<span id="cb35-6"><a href="demonstration-app-1.html#cb35-6" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb35-7"><a href="demonstration-app-1.html#cb35-7" aria-hidden="true" tabindex="-1"></a>cols_choice(penguins_records, <span class="st">&#39;object&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb38-1"><a href="demonstration-app-1.html#cb38-1" aria-hidden="true" tabindex="-1"></a>penguins_records <span class="op">=</span> penguins.to_dict(<span class="st">&#39;records&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb39-1"><a href="demonstration-app-1.html#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cols_choice (data_records, include):</span>
+<span id="cb39-2"><a href="demonstration-app-1.html#cb39-2" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> pd.DataFrame.from_dict(data_records)</span>
+<span id="cb39-3"><a href="demonstration-app-1.html#cb39-3" aria-hidden="true" tabindex="-1"></a>    col_names <span class="op">=</span> df.select_dtypes(include<span class="op">=</span>include).columns.to_list()</span>
+<span id="cb39-4"><a href="demonstration-app-1.html#cb39-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb39-5"><a href="demonstration-app-1.html#cb39-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [{<span class="st">&#39;label&#39;</span>: i, <span class="st">&#39;value&#39;</span>: i} <span class="cf">for</span> i <span class="kw">in</span> col_names]</span>
+<span id="cb39-6"><a href="demonstration-app-1.html#cb39-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb39-7"><a href="demonstration-app-1.html#cb39-7" aria-hidden="true" tabindex="-1"></a>cols_choice(penguins_records, <span class="st">&#39;object&#39;</span>)</span></code></pre></div>
 <pre><code>## [{&#39;label&#39;: &#39;species&#39;, &#39;value&#39;: &#39;species&#39;}, {&#39;label&#39;: &#39;island&#39;, &#39;value&#39;: &#39;island&#39;}, {&#39;label&#39;: &#39;sex&#39;, &#39;value&#39;: &#39;sex&#39;}]</code></pre>
-<div class="sourceCode" id="cb37"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb37-1"><a href="demonstration-app-1.html#cb37-1" aria-hidden="true" tabindex="-1"></a>cols_choice(penguins_records, <span class="st">&#39;number&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb41-1"><a href="demonstration-app-1.html#cb41-1" aria-hidden="true" tabindex="-1"></a>cols_choice(penguins_records, <span class="st">&#39;number&#39;</span>)</span></code></pre></div>
 <pre><code>## [{&#39;label&#39;: &#39;bill_length_mm&#39;, &#39;value&#39;: &#39;bill_length_mm&#39;}, {&#39;label&#39;: &#39;bill_depth_mm&#39;, &#39;value&#39;: &#39;bill_depth_mm&#39;}, {&#39;label&#39;: &#39;flipper_length_mm&#39;, &#39;value&#39;: &#39;flipper_length_mm&#39;}, {&#39;label&#39;: &#39;body_mass_g&#39;, &#39;value&#39;: &#39;body_mass_g&#39;}, {&#39;label&#39;: &#39;year&#39;, &#39;value&#39;: &#39;year&#39;}]</code></pre>
-<div class="sourceCode" id="cb39"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb39-1"><a href="demonstration-app-1.html#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cols_header (data_records):</span>
-<span id="cb39-2"><a href="demonstration-app-1.html#cb39-2" aria-hidden="true" tabindex="-1"></a>    cols <span class="op">=</span> []</span>
-<span id="cb39-3"><a href="demonstration-app-1.html#cb39-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="bu">len</span>(data_records) <span class="op">&gt;</span> <span class="dv">0</span>):</span>
-<span id="cb39-4"><a href="demonstration-app-1.html#cb39-4" aria-hidden="true" tabindex="-1"></a>        cols <span class="op">=</span> [{<span class="st">&#39;name&#39;</span>: i, <span class="st">&#39;id&#39;</span>: i} <span class="cf">for</span> i <span class="kw">in</span> data_records[<span class="dv">0</span>].keys()]</span>
-<span id="cb39-5"><a href="demonstration-app-1.html#cb39-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-6"><a href="demonstration-app-1.html#cb39-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cols</span>
-<span id="cb39-7"><a href="demonstration-app-1.html#cb39-7" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb39-8"><a href="demonstration-app-1.html#cb39-8" aria-hidden="true" tabindex="-1"></a>cols_header(penguins_records)  </span></code></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb43-1"><a href="demonstration-app-1.html#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cols_header (data_records):</span>
+<span id="cb43-2"><a href="demonstration-app-1.html#cb43-2" aria-hidden="true" tabindex="-1"></a>    cols <span class="op">=</span> []</span>
+<span id="cb43-3"><a href="demonstration-app-1.html#cb43-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="bu">len</span>(data_records) <span class="op">&gt;</span> <span class="dv">0</span>):</span>
+<span id="cb43-4"><a href="demonstration-app-1.html#cb43-4" aria-hidden="true" tabindex="-1"></a>        cols <span class="op">=</span> [{<span class="st">&#39;name&#39;</span>: i, <span class="st">&#39;id&#39;</span>: i} <span class="cf">for</span> i <span class="kw">in</span> data_records[<span class="dv">0</span>].keys()]</span>
+<span id="cb43-5"><a href="demonstration-app-1.html#cb43-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-6"><a href="demonstration-app-1.html#cb43-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cols</span>
+<span id="cb43-7"><a href="demonstration-app-1.html#cb43-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb43-8"><a href="demonstration-app-1.html#cb43-8" aria-hidden="true" tabindex="-1"></a>cols_header(penguins_records)  </span></code></pre></div>
 <pre><code>## [{&#39;name&#39;: &#39;species&#39;, &#39;id&#39;: &#39;species&#39;}, {&#39;name&#39;: &#39;island&#39;, &#39;id&#39;: &#39;island&#39;}, {&#39;name&#39;: &#39;bill_length_mm&#39;, &#39;id&#39;: &#39;bill_length_mm&#39;}, {&#39;name&#39;: &#39;bill_depth_mm&#39;, &#39;id&#39;: &#39;bill_depth_mm&#39;}, {&#39;name&#39;: &#39;flipper_length_mm&#39;, &#39;id&#39;: &#39;flipper_length_mm&#39;}, {&#39;name&#39;: &#39;body_mass_g&#39;, &#39;id&#39;: &#39;body_mass_g&#39;}, {&#39;name&#39;: &#39;sex&#39;, &#39;id&#39;: &#39;sex&#39;}, {&#39;name&#39;: &#39;year&#39;, &#39;id&#39;: &#39;year&#39;}]</code></pre>
-<div class="sourceCode" id="cb41"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb41-1"><a href="demonstration-app-1.html#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> aggregate_df (df, cols_group, cols_agg, func_agg):</span>
-<span id="cb41-2"><a href="demonstration-app-1.html#cb41-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="kw">not</span> cols_group <span class="kw">is</span> <span class="va">None</span>):</span>
-<span id="cb41-3"><a href="demonstration-app-1.html#cb41-3" aria-hidden="true" tabindex="-1"></a>        df <span class="op">=</span> df.groupby(cols_group)</span>
-<span id="cb41-4"><a href="demonstration-app-1.html#cb41-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-5"><a href="demonstration-app-1.html#cb41-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (cols_agg <span class="kw">is</span> <span class="va">None</span> <span class="kw">or</span> <span class="bu">len</span>(cols_agg) <span class="op">==</span> <span class="dv">0</span>):</span>
-<span id="cb41-6"><a href="demonstration-app-1.html#cb41-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> []</span>
-<span id="cb41-7"><a href="demonstration-app-1.html#cb41-7" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb41-8"><a href="demonstration-app-1.html#cb41-8" aria-hidden="true" tabindex="-1"></a>    dict_agg <span class="op">=</span> {}</span>
-<span id="cb41-9"><a href="demonstration-app-1.html#cb41-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> col <span class="kw">in</span> cols_agg:</span>
-<span id="cb41-10"><a href="demonstration-app-1.html#cb41-10" aria-hidden="true" tabindex="-1"></a>        dict_agg[col] <span class="op">=</span> func_agg</span>
-<span id="cb41-11"><a href="demonstration-app-1.html#cb41-11" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb41-12"><a href="demonstration-app-1.html#cb41-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># aggregate DataFrame</span></span>
-<span id="cb41-13"><a href="demonstration-app-1.html#cb41-13" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> df.agg(dict_agg).reset_index()</span>
-<span id="cb41-14"><a href="demonstration-app-1.html#cb41-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-15"><a href="demonstration-app-1.html#cb41-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df</span>
-<span id="cb41-16"><a href="demonstration-app-1.html#cb41-16" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb41-17"><a href="demonstration-app-1.html#cb41-17" aria-hidden="true" tabindex="-1"></a>aggregate_df(</span>
-<span id="cb41-18"><a href="demonstration-app-1.html#cb41-18" aria-hidden="true" tabindex="-1"></a>  penguins, </span>
-<span id="cb41-19"><a href="demonstration-app-1.html#cb41-19" aria-hidden="true" tabindex="-1"></a>  cols_group <span class="op">=</span> <span class="st">&quot;island&quot;</span>, </span>
-<span id="cb41-20"><a href="demonstration-app-1.html#cb41-20" aria-hidden="true" tabindex="-1"></a>  cols_agg <span class="op">=</span> [<span class="st">&quot;bill_length_mm&quot;</span>, <span class="st">&quot;bill_depth_mm&quot;</span>],</span>
-<span id="cb41-21"><a href="demonstration-app-1.html#cb41-21" aria-hidden="true" tabindex="-1"></a>  func_agg <span class="op">=</span> <span class="st">&quot;mean&quot;</span></span>
-<span id="cb41-22"><a href="demonstration-app-1.html#cb41-22" aria-hidden="true" tabindex="-1"></a>)  </span></code></pre></div>
+<div class="sourceCode" id="cb45"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb45-1"><a href="demonstration-app-1.html#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> aggregate_df (df, cols_group, cols_agg, func_agg):</span>
+<span id="cb45-2"><a href="demonstration-app-1.html#cb45-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="kw">not</span> cols_group <span class="kw">is</span> <span class="va">None</span>):</span>
+<span id="cb45-3"><a href="demonstration-app-1.html#cb45-3" aria-hidden="true" tabindex="-1"></a>        df <span class="op">=</span> df.groupby(cols_group)</span>
+<span id="cb45-4"><a href="demonstration-app-1.html#cb45-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-5"><a href="demonstration-app-1.html#cb45-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (cols_agg <span class="kw">is</span> <span class="va">None</span> <span class="kw">or</span> <span class="bu">len</span>(cols_agg) <span class="op">==</span> <span class="dv">0</span>):</span>
+<span id="cb45-6"><a href="demonstration-app-1.html#cb45-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> []</span>
+<span id="cb45-7"><a href="demonstration-app-1.html#cb45-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb45-8"><a href="demonstration-app-1.html#cb45-8" aria-hidden="true" tabindex="-1"></a>    dict_agg <span class="op">=</span> {}</span>
+<span id="cb45-9"><a href="demonstration-app-1.html#cb45-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> col <span class="kw">in</span> cols_agg:</span>
+<span id="cb45-10"><a href="demonstration-app-1.html#cb45-10" aria-hidden="true" tabindex="-1"></a>        dict_agg[col] <span class="op">=</span> func_agg</span>
+<span id="cb45-11"><a href="demonstration-app-1.html#cb45-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb45-12"><a href="demonstration-app-1.html#cb45-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># aggregate DataFrame</span></span>
+<span id="cb45-13"><a href="demonstration-app-1.html#cb45-13" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> df.agg(dict_agg).reset_index()</span>
+<span id="cb45-14"><a href="demonstration-app-1.html#cb45-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-15"><a href="demonstration-app-1.html#cb45-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df</span>
+<span id="cb45-16"><a href="demonstration-app-1.html#cb45-16" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb45-17"><a href="demonstration-app-1.html#cb45-17" aria-hidden="true" tabindex="-1"></a>aggregate_df(</span>
+<span id="cb45-18"><a href="demonstration-app-1.html#cb45-18" aria-hidden="true" tabindex="-1"></a>  penguins, </span>
+<span id="cb45-19"><a href="demonstration-app-1.html#cb45-19" aria-hidden="true" tabindex="-1"></a>  cols_group <span class="op">=</span> <span class="st">&quot;island&quot;</span>, </span>
+<span id="cb45-20"><a href="demonstration-app-1.html#cb45-20" aria-hidden="true" tabindex="-1"></a>  cols_agg <span class="op">=</span> [<span class="st">&quot;bill_length_mm&quot;</span>, <span class="st">&quot;bill_depth_mm&quot;</span>],</span>
+<span id="cb45-21"><a href="demonstration-app-1.html#cb45-21" aria-hidden="true" tabindex="-1"></a>  func_agg <span class="op">=</span> <span class="st">&quot;mean&quot;</span></span>
+<span id="cb45-22"><a href="demonstration-app-1.html#cb45-22" aria-hidden="true" tabindex="-1"></a>)  </span></code></pre></div>
 <pre><code>##       island  bill_length_mm  bill_depth_mm
 ## 0     Biscoe       45.257485      15.874850
 ## 1      Dream       44.167742      18.344355
@@ -360,40 +360,40 @@ Figure 2.2: Legend
 </div>
 <div id="compmonent-layout" class="section level3" number="2.2.3">
 <h3><span class="header-section-number">2.2.3</span> Compmonent layout</h3>
-<div class="sourceCode" id="cb43"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb43-1"><a href="demonstration-app-1.html#cb43-1" aria-hidden="true" tabindex="-1"></a>app.layout <span class="op">=</span> html.Div(</span>
-<span id="cb43-2"><a href="demonstration-app-1.html#cb43-2" aria-hidden="true" tabindex="-1"></a>    className<span class="op">=</span><span class="st">&#39;container-fluid&#39;</span>,</span>
-<span id="cb43-3"><a href="demonstration-app-1.html#cb43-3" aria-hidden="true" tabindex="-1"></a>    children<span class="op">=</span>[</span>
-<span id="cb43-4"><a href="demonstration-app-1.html#cb43-4" aria-hidden="true" tabindex="-1"></a>        dcc.Store(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;inp&#39;</span>, data<span class="op">=</span>penguins.to_dict(<span class="st">&#39;records&#39;</span>)),</span>
-<span id="cb43-5"><a href="demonstration-app-1.html#cb43-5" aria-hidden="true" tabindex="-1"></a>        dcc.Store(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;agg&#39;</span>, data<span class="op">=</span>[]),</span>
-<span id="cb43-6"><a href="demonstration-app-1.html#cb43-6" aria-hidden="true" tabindex="-1"></a>        html.H2(<span class="st">&#39;Aggregator&#39;</span>),</span>
-<span id="cb43-7"><a href="demonstration-app-1.html#cb43-7" aria-hidden="true" tabindex="-1"></a>        html.Div(</span>
-<span id="cb43-8"><a href="demonstration-app-1.html#cb43-8" aria-hidden="true" tabindex="-1"></a>            className<span class="op">=</span><span class="st">&#39;row&#39;</span>,</span>
-<span id="cb43-9"><a href="demonstration-app-1.html#cb43-9" aria-hidden="true" tabindex="-1"></a>            children <span class="op">=</span>[</span>
-<span id="cb43-10"><a href="demonstration-app-1.html#cb43-10" aria-hidden="true" tabindex="-1"></a>                html.Div(</span>
-<span id="cb43-11"><a href="demonstration-app-1.html#cb43-11" aria-hidden="true" tabindex="-1"></a>                    className<span class="op">=</span><span class="st">&#39;col-sm-4&#39;</span>,</span>
-<span id="cb43-12"><a href="demonstration-app-1.html#cb43-12" aria-hidden="true" tabindex="-1"></a>                    children<span class="op">=</span>[</span>
-<span id="cb43-13"><a href="demonstration-app-1.html#cb43-13" aria-hidden="true" tabindex="-1"></a>                        dbc.Card([</span>
-<span id="cb43-14"><a href="demonstration-app-1.html#cb43-14" aria-hidden="true" tabindex="-1"></a>                            dbc.CardHeader(<span class="st">&#39;Aggregation&#39;</span>),</span>
-<span id="cb43-15"><a href="demonstration-app-1.html#cb43-15" aria-hidden="true" tabindex="-1"></a>                            dbc.CardBody([</span>
-<span id="cb43-16"><a href="demonstration-app-1.html#cb43-16" aria-hidden="true" tabindex="-1"></a>                              ...</span>
-<span id="cb43-17"><a href="demonstration-app-1.html#cb43-17" aria-hidden="true" tabindex="-1"></a>                            ])</span>
-<span id="cb43-18"><a href="demonstration-app-1.html#cb43-18" aria-hidden="true" tabindex="-1"></a>                        ])</span>
-<span id="cb43-19"><a href="demonstration-app-1.html#cb43-19" aria-hidden="true" tabindex="-1"></a>                    ]</span>
-<span id="cb43-20"><a href="demonstration-app-1.html#cb43-20" aria-hidden="true" tabindex="-1"></a>                ),</span>
-<span id="cb43-21"><a href="demonstration-app-1.html#cb43-21" aria-hidden="true" tabindex="-1"></a>                html.Div(</span>
-<span id="cb43-22"><a href="demonstration-app-1.html#cb43-22" aria-hidden="true" tabindex="-1"></a>                    className<span class="op">=</span><span class="st">&#39;col-sm-8&#39;</span>,</span>
-<span id="cb43-23"><a href="demonstration-app-1.html#cb43-23" aria-hidden="true" tabindex="-1"></a>                    children<span class="op">=</span>[</span>
-<span id="cb43-24"><a href="demonstration-app-1.html#cb43-24" aria-hidden="true" tabindex="-1"></a>                        html.H3(<span class="st">&#39;Input data&#39;</span>),</span>
-<span id="cb43-25"><a href="demonstration-app-1.html#cb43-25" aria-hidden="true" tabindex="-1"></a>                        ...</span>
-<span id="cb43-26"><a href="demonstration-app-1.html#cb43-26" aria-hidden="true" tabindex="-1"></a>                        html.Hr(),</span>
-<span id="cb43-27"><a href="demonstration-app-1.html#cb43-27" aria-hidden="true" tabindex="-1"></a>                        html.H3(<span class="st">&#39;Aggregated data&#39;</span>),</span>
-<span id="cb43-28"><a href="demonstration-app-1.html#cb43-28" aria-hidden="true" tabindex="-1"></a>                        ...</span>
-<span id="cb43-29"><a href="demonstration-app-1.html#cb43-29" aria-hidden="true" tabindex="-1"></a>                    ]</span>
-<span id="cb43-30"><a href="demonstration-app-1.html#cb43-30" aria-hidden="true" tabindex="-1"></a>                )</span>
-<span id="cb43-31"><a href="demonstration-app-1.html#cb43-31" aria-hidden="true" tabindex="-1"></a>            ]</span>
-<span id="cb43-32"><a href="demonstration-app-1.html#cb43-32" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb43-33"><a href="demonstration-app-1.html#cb43-33" aria-hidden="true" tabindex="-1"></a>    ]</span>
-<span id="cb43-34"><a href="demonstration-app-1.html#cb43-34" aria-hidden="true" tabindex="-1"></a>) </span></code></pre></div>
+<div class="sourceCode" id="cb47"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb47-1"><a href="demonstration-app-1.html#cb47-1" aria-hidden="true" tabindex="-1"></a>app.layout <span class="op">=</span> html.Div(</span>
+<span id="cb47-2"><a href="demonstration-app-1.html#cb47-2" aria-hidden="true" tabindex="-1"></a>    className<span class="op">=</span><span class="st">&#39;container-fluid&#39;</span>,</span>
+<span id="cb47-3"><a href="demonstration-app-1.html#cb47-3" aria-hidden="true" tabindex="-1"></a>    children<span class="op">=</span>[</span>
+<span id="cb47-4"><a href="demonstration-app-1.html#cb47-4" aria-hidden="true" tabindex="-1"></a>        dcc.Store(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;inp&#39;</span>, data<span class="op">=</span>penguins.to_dict(<span class="st">&#39;records&#39;</span>)),</span>
+<span id="cb47-5"><a href="demonstration-app-1.html#cb47-5" aria-hidden="true" tabindex="-1"></a>        dcc.Store(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;agg&#39;</span>, data<span class="op">=</span>[]),</span>
+<span id="cb47-6"><a href="demonstration-app-1.html#cb47-6" aria-hidden="true" tabindex="-1"></a>        html.H2(<span class="st">&#39;Aggregator&#39;</span>),</span>
+<span id="cb47-7"><a href="demonstration-app-1.html#cb47-7" aria-hidden="true" tabindex="-1"></a>        html.Div(</span>
+<span id="cb47-8"><a href="demonstration-app-1.html#cb47-8" aria-hidden="true" tabindex="-1"></a>            className<span class="op">=</span><span class="st">&#39;row&#39;</span>,</span>
+<span id="cb47-9"><a href="demonstration-app-1.html#cb47-9" aria-hidden="true" tabindex="-1"></a>            children <span class="op">=</span>[</span>
+<span id="cb47-10"><a href="demonstration-app-1.html#cb47-10" aria-hidden="true" tabindex="-1"></a>                html.Div(</span>
+<span id="cb47-11"><a href="demonstration-app-1.html#cb47-11" aria-hidden="true" tabindex="-1"></a>                    className<span class="op">=</span><span class="st">&#39;col-sm-4&#39;</span>,</span>
+<span id="cb47-12"><a href="demonstration-app-1.html#cb47-12" aria-hidden="true" tabindex="-1"></a>                    children<span class="op">=</span>[</span>
+<span id="cb47-13"><a href="demonstration-app-1.html#cb47-13" aria-hidden="true" tabindex="-1"></a>                        dbc.Card([</span>
+<span id="cb47-14"><a href="demonstration-app-1.html#cb47-14" aria-hidden="true" tabindex="-1"></a>                            dbc.CardHeader(<span class="st">&#39;Aggregation&#39;</span>),</span>
+<span id="cb47-15"><a href="demonstration-app-1.html#cb47-15" aria-hidden="true" tabindex="-1"></a>                            dbc.CardBody([</span>
+<span id="cb47-16"><a href="demonstration-app-1.html#cb47-16" aria-hidden="true" tabindex="-1"></a>                              ...</span>
+<span id="cb47-17"><a href="demonstration-app-1.html#cb47-17" aria-hidden="true" tabindex="-1"></a>                            ])</span>
+<span id="cb47-18"><a href="demonstration-app-1.html#cb47-18" aria-hidden="true" tabindex="-1"></a>                        ])</span>
+<span id="cb47-19"><a href="demonstration-app-1.html#cb47-19" aria-hidden="true" tabindex="-1"></a>                    ]</span>
+<span id="cb47-20"><a href="demonstration-app-1.html#cb47-20" aria-hidden="true" tabindex="-1"></a>                ),</span>
+<span id="cb47-21"><a href="demonstration-app-1.html#cb47-21" aria-hidden="true" tabindex="-1"></a>                html.Div(</span>
+<span id="cb47-22"><a href="demonstration-app-1.html#cb47-22" aria-hidden="true" tabindex="-1"></a>                    className<span class="op">=</span><span class="st">&#39;col-sm-8&#39;</span>,</span>
+<span id="cb47-23"><a href="demonstration-app-1.html#cb47-23" aria-hidden="true" tabindex="-1"></a>                    children<span class="op">=</span>[</span>
+<span id="cb47-24"><a href="demonstration-app-1.html#cb47-24" aria-hidden="true" tabindex="-1"></a>                        html.H3(<span class="st">&#39;Input data&#39;</span>),</span>
+<span id="cb47-25"><a href="demonstration-app-1.html#cb47-25" aria-hidden="true" tabindex="-1"></a>                        ...</span>
+<span id="cb47-26"><a href="demonstration-app-1.html#cb47-26" aria-hidden="true" tabindex="-1"></a>                        html.Hr(),</span>
+<span id="cb47-27"><a href="demonstration-app-1.html#cb47-27" aria-hidden="true" tabindex="-1"></a>                        html.H3(<span class="st">&#39;Aggregated data&#39;</span>),</span>
+<span id="cb47-28"><a href="demonstration-app-1.html#cb47-28" aria-hidden="true" tabindex="-1"></a>                        ...</span>
+<span id="cb47-29"><a href="demonstration-app-1.html#cb47-29" aria-hidden="true" tabindex="-1"></a>                    ]</span>
+<span id="cb47-30"><a href="demonstration-app-1.html#cb47-30" aria-hidden="true" tabindex="-1"></a>                )</span>
+<span id="cb47-31"><a href="demonstration-app-1.html#cb47-31" aria-hidden="true" tabindex="-1"></a>            ]</span>
+<span id="cb47-32"><a href="demonstration-app-1.html#cb47-32" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb47-33"><a href="demonstration-app-1.html#cb47-33" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb47-34"><a href="demonstration-app-1.html#cb47-34" aria-hidden="true" tabindex="-1"></a>) </span></code></pre></div>
 </div>
 <div id="callbacks" class="section level3" number="2.2.4">
 <h3><span class="header-section-number">2.2.4</span> Callbacks</h3>
