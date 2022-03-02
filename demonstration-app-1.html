@@ -331,26 +331,28 @@ For Python programming, there is a great introduction at reticulate.</p>
 <div class="sourceCode" id="cb38"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb38-1"><a href="demonstration-app-1.html#cb38-1" aria-hidden="true" tabindex="-1"></a>penguins_records <span class="op">=</span> penguins.to_dict(<span class="st">&#39;records&#39;</span>)</span>
 <span id="cb38-2"><a href="demonstration-app-1.html#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(penguins_records[<span class="dv">0</span>:<span class="dv">2</span>]) <span class="co"># just to get a flavor</span></span></code></pre></div>
 <pre><code>## [{&#39;species&#39;: &#39;Adelie&#39;, &#39;island&#39;: &#39;Torgersen&#39;, &#39;bill_length_mm&#39;: 39.1, &#39;bill_depth_mm&#39;: 18.7, &#39;flipper_length_mm&#39;: 181.0, &#39;body_mass_g&#39;: 3750.0, &#39;sex&#39;: &#39;male&#39;, &#39;year&#39;: 2007}, {&#39;species&#39;: &#39;Adelie&#39;, &#39;island&#39;: &#39;Torgersen&#39;, &#39;bill_length_mm&#39;: 39.5, &#39;bill_depth_mm&#39;: 17.4, &#39;flipper_length_mm&#39;: 186.0, &#39;body_mass_g&#39;: 3800.0, &#39;sex&#39;: &#39;female&#39;, &#39;year&#39;: 2007}]</code></pre>
-<p>The first function we’ll verify is used to tell us, for a given data frame (sent as records), and a given type, which columns are of that type.</p>
-<div class="sourceCode" id="cb40"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb40-1"><a href="demonstration-app-1.html#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cols_choice (data_records, include):</span>
-<span id="cb40-2"><a href="demonstration-app-1.html#cb40-2" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> pd.DataFrame.from_dict(data_records)</span>
-<span id="cb40-3"><a href="demonstration-app-1.html#cb40-3" aria-hidden="true" tabindex="-1"></a>    col_names <span class="op">=</span> df.select_dtypes(include<span class="op">=</span>include).columns.to_list()</span>
-<span id="cb40-4"><a href="demonstration-app-1.html#cb40-4" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb40-5"><a href="demonstration-app-1.html#cb40-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> col_names</span></code></pre></div>
-<p>Note that the first thing we do is reconstitute the Pandas data frame from the records.
-Return a list of column names that satisfies the predicate in <code>select_types()</code>.</p>
+<p>Let’s call this <em>records</em> format, as opposed to data-frame format.
+You’ll see that the records-format prints as JSON; this is a Python list, so the Dash server can send it back and forth between the server and the DOM.</p>
+<p>For me, the biggest thing to keep in mind (other than figuring out how Pandas works) is if data is formatted as records or as a data frame.</p>
+<p>The first function we’ll verify is used to tell us, for a given a data frame and a given Pandas type, which columns are of that type.
+(In the app, we’ll convert to records-format in the callback function.)</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb40-1"><a href="demonstration-app-1.html#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cols_choice (df, include):</span>
+<span id="cb40-2"><a href="demonstration-app-1.html#cb40-2" aria-hidden="true" tabindex="-1"></a>    col_names <span class="op">=</span> df.select_dtypes(include<span class="op">=</span>include).columns.to_list()</span>
+<span id="cb40-3"><a href="demonstration-app-1.html#cb40-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-4"><a href="demonstration-app-1.html#cb40-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> col_names</span></code></pre></div>
 <p>Let’s test the function.
 In Pandas, strings have type <code>'object'</code>:</p>
-<div class="sourceCode" id="cb41"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb41-1"><a href="demonstration-app-1.html#cb41-1" aria-hidden="true" tabindex="-1"></a>cols_choice(penguins_records, <span class="st">&#39;object&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb41-1"><a href="demonstration-app-1.html#cb41-1" aria-hidden="true" tabindex="-1"></a>cols_choice(penguins, <span class="st">&#39;object&#39;</span>)</span></code></pre></div>
 <pre><code>## [&#39;species&#39;, &#39;island&#39;, &#39;sex&#39;]</code></pre>
 <p>Numbers have type <code>'number'</code>:</p>
-<div class="sourceCode" id="cb43"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb43-1"><a href="demonstration-app-1.html#cb43-1" aria-hidden="true" tabindex="-1"></a>cols_choice(penguins_records, <span class="st">&#39;number&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb43-1"><a href="demonstration-app-1.html#cb43-1" aria-hidden="true" tabindex="-1"></a>cols_choice(penguins, <span class="st">&#39;number&#39;</span>)</span></code></pre></div>
 <pre><code>## [&#39;bill_length_mm&#39;, &#39;bill_depth_mm&#39;, &#39;flipper_length_mm&#39;, &#39;body_mass_g&#39;, &#39;year&#39;]</code></pre>
 <p>So far, so good.</p>
 <p>Next, we need a function to generate the (display) table properties.
 We need to return a list, with a dictionary for each column in the data frame.
-Each dictionary needs elements <code>'name</code> and <code>'id'</code>, each of which has the name of the column.</p>
-<p>Note that we are being sent the records, rather than a the data frame.
+Each dictionary needs elements <code>'name</code> and <code>'id'</code>, each of which has the name of the column.
+As we’ll see later, this is the format we need to specify the table headers.</p>
+<p>Note that we are <em>not</em> using the data-frame format in this function, so we can keep everything in records format.
 We use a trick by looking at only the first (well, zeroth) record.</p>
 <div class="sourceCode" id="cb45"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb45-1"><a href="demonstration-app-1.html#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cols_header (data_records):</span>
 <span id="cb45-2"><a href="demonstration-app-1.html#cb45-2" aria-hidden="true" tabindex="-1"></a>    cols <span class="op">=</span> []</span>
@@ -363,29 +365,37 @@ We use a trick by looking at only the first (well, zeroth) record.</p>
 <pre><code>## [{&#39;name&#39;: &#39;species&#39;, &#39;id&#39;: &#39;species&#39;}, {&#39;name&#39;: &#39;island&#39;, &#39;id&#39;: &#39;island&#39;}, {&#39;name&#39;: &#39;bill_length_mm&#39;, &#39;id&#39;: &#39;bill_length_mm&#39;}, {&#39;name&#39;: &#39;bill_depth_mm&#39;, &#39;id&#39;: &#39;bill_depth_mm&#39;}, {&#39;name&#39;: &#39;flipper_length_mm&#39;, &#39;id&#39;: &#39;flipper_length_mm&#39;}, {&#39;name&#39;: &#39;body_mass_g&#39;, &#39;id&#39;: &#39;body_mass_g&#39;}, {&#39;name&#39;: &#39;sex&#39;, &#39;id&#39;: &#39;sex&#39;}, {&#39;name&#39;: &#39;year&#39;, &#39;id&#39;: &#39;year&#39;}]</code></pre>
 <p>This seems OK.</p>
 <p>Finally, we need an aggregation function.
-For convenience, we’ll write this as in terms of data frames; we’ll see later that we adapt this function to the callback, which uses records.</p>
-<div class="sourceCode" id="cb47"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb47-1"><a href="demonstration-app-1.html#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> aggregate_df (df, cols_group, cols_agg, func_agg):</span>
-<span id="cb47-2"><a href="demonstration-app-1.html#cb47-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="kw">not</span> cols_group <span class="kw">is</span> <span class="va">None</span>):</span>
-<span id="cb47-3"><a href="demonstration-app-1.html#cb47-3" aria-hidden="true" tabindex="-1"></a>        df <span class="op">=</span> df.groupby(cols_group)</span>
-<span id="cb47-4"><a href="demonstration-app-1.html#cb47-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-5"><a href="demonstration-app-1.html#cb47-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (cols_agg <span class="kw">is</span> <span class="va">None</span> <span class="kw">or</span> <span class="bu">len</span>(cols_agg) <span class="op">==</span> <span class="dv">0</span>):</span>
-<span id="cb47-6"><a href="demonstration-app-1.html#cb47-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> []</span>
-<span id="cb47-7"><a href="demonstration-app-1.html#cb47-7" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb47-8"><a href="demonstration-app-1.html#cb47-8" aria-hidden="true" tabindex="-1"></a>    dict_agg <span class="op">=</span> {}</span>
-<span id="cb47-9"><a href="demonstration-app-1.html#cb47-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> col <span class="kw">in</span> cols_agg:</span>
-<span id="cb47-10"><a href="demonstration-app-1.html#cb47-10" aria-hidden="true" tabindex="-1"></a>        dict_agg[col] <span class="op">=</span> func_agg</span>
-<span id="cb47-11"><a href="demonstration-app-1.html#cb47-11" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb47-12"><a href="demonstration-app-1.html#cb47-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># aggregate DataFrame</span></span>
-<span id="cb47-13"><a href="demonstration-app-1.html#cb47-13" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> df.agg(dict_agg).reset_index()</span>
+We send a data frame, then some lists of column-names, and a string naming an aggregation-function.
+This is an exercise in Pandas - I think this works, but my lack of experience in Pandas suggests there may be a “better” way.
+We’ll write this as in terms of data frames; we’ll convert to/from records-format in the callback function.</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb47-1"><a href="demonstration-app-1.html#cb47-1" aria-hidden="true" tabindex="-1"></a>agg_function_choices <span class="op">=</span> [<span class="st">&#39;mean&#39;</span>, <span class="st">&#39;min&#39;</span>, <span class="st">&#39;max&#39;</span>]</span>
+<span id="cb47-2"><a href="demonstration-app-1.html#cb47-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-3"><a href="demonstration-app-1.html#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> aggregate_df (df, cols_group, cols_agg, func_agg,</span>
+<span id="cb47-4"><a href="demonstration-app-1.html#cb47-4" aria-hidden="true" tabindex="-1"></a>                  str_fn_choices <span class="op">=</span> agg_function_choices):</span>
+<span id="cb47-5"><a href="demonstration-app-1.html#cb47-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb47-6"><a href="demonstration-app-1.html#cb47-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> func_agg <span class="kw">in</span> str_fn_choices:</span>
+<span id="cb47-7"><a href="demonstration-app-1.html#cb47-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">AssertionError</span>(<span class="ss">f&quot;</span><span class="sc">{</span>func_agg<span class="sc">}</span><span class="ss"> not a legal function-choice&quot;</span>)</span>
+<span id="cb47-8"><a href="demonstration-app-1.html#cb47-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb47-9"><a href="demonstration-app-1.html#cb47-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="kw">not</span> cols_group <span class="kw">is</span> <span class="va">None</span>):</span>
+<span id="cb47-10"><a href="demonstration-app-1.html#cb47-10" aria-hidden="true" tabindex="-1"></a>        df <span class="op">=</span> df.groupby(cols_group)</span>
+<span id="cb47-11"><a href="demonstration-app-1.html#cb47-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-12"><a href="demonstration-app-1.html#cb47-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (cols_agg <span class="kw">is</span> <span class="va">None</span> <span class="kw">or</span> <span class="bu">len</span>(cols_agg) <span class="op">==</span> <span class="dv">0</span>):</span>
+<span id="cb47-13"><a href="demonstration-app-1.html#cb47-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> []</span>
 <span id="cb47-14"><a href="demonstration-app-1.html#cb47-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-15"><a href="demonstration-app-1.html#cb47-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df</span>
-<span id="cb47-16"><a href="demonstration-app-1.html#cb47-16" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb47-17"><a href="demonstration-app-1.html#cb47-17" aria-hidden="true" tabindex="-1"></a>aggregate_df(</span>
-<span id="cb47-18"><a href="demonstration-app-1.html#cb47-18" aria-hidden="true" tabindex="-1"></a>  penguins, </span>
-<span id="cb47-19"><a href="demonstration-app-1.html#cb47-19" aria-hidden="true" tabindex="-1"></a>  cols_group <span class="op">=</span> <span class="st">&quot;island&quot;</span>, </span>
-<span id="cb47-20"><a href="demonstration-app-1.html#cb47-20" aria-hidden="true" tabindex="-1"></a>  cols_agg <span class="op">=</span> [<span class="st">&quot;bill_length_mm&quot;</span>, <span class="st">&quot;bill_depth_mm&quot;</span>],</span>
-<span id="cb47-21"><a href="demonstration-app-1.html#cb47-21" aria-hidden="true" tabindex="-1"></a>  func_agg <span class="op">=</span> <span class="st">&quot;mean&quot;</span></span>
-<span id="cb47-22"><a href="demonstration-app-1.html#cb47-22" aria-hidden="true" tabindex="-1"></a>)  </span></code></pre></div>
+<span id="cb47-15"><a href="demonstration-app-1.html#cb47-15" aria-hidden="true" tabindex="-1"></a>    dict_agg <span class="op">=</span> {}</span>
+<span id="cb47-16"><a href="demonstration-app-1.html#cb47-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> col <span class="kw">in</span> cols_agg:</span>
+<span id="cb47-17"><a href="demonstration-app-1.html#cb47-17" aria-hidden="true" tabindex="-1"></a>        dict_agg[col] <span class="op">=</span> func_agg</span>
+<span id="cb47-18"><a href="demonstration-app-1.html#cb47-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb47-19"><a href="demonstration-app-1.html#cb47-19" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> df.agg(dict_agg).reset_index()</span>
+<span id="cb47-20"><a href="demonstration-app-1.html#cb47-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-21"><a href="demonstration-app-1.html#cb47-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df</span>
+<span id="cb47-22"><a href="demonstration-app-1.html#cb47-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb47-23"><a href="demonstration-app-1.html#cb47-23" aria-hidden="true" tabindex="-1"></a>aggregate_df(</span>
+<span id="cb47-24"><a href="demonstration-app-1.html#cb47-24" aria-hidden="true" tabindex="-1"></a>  penguins, </span>
+<span id="cb47-25"><a href="demonstration-app-1.html#cb47-25" aria-hidden="true" tabindex="-1"></a>  cols_group <span class="op">=</span> <span class="st">&quot;island&quot;</span>, </span>
+<span id="cb47-26"><a href="demonstration-app-1.html#cb47-26" aria-hidden="true" tabindex="-1"></a>  cols_agg <span class="op">=</span> [<span class="st">&quot;bill_length_mm&quot;</span>, <span class="st">&quot;bill_depth_mm&quot;</span>],</span>
+<span id="cb47-27"><a href="demonstration-app-1.html#cb47-27" aria-hidden="true" tabindex="-1"></a>  func_agg <span class="op">=</span> <span class="st">&quot;mean&quot;</span></span>
+<span id="cb47-28"><a href="demonstration-app-1.html#cb47-28" aria-hidden="true" tabindex="-1"></a>)  </span></code></pre></div>
 <pre><code>##       island  bill_length_mm  bill_depth_mm
 ## 0     Biscoe       45.257485      15.874850
 ## 1      Dream       44.167742      18.344355
