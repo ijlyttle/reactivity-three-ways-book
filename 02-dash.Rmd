@@ -191,30 +191,32 @@ penguins_records = penguins.to_dict('records')
 print(penguins_records[0:2]) # just to get a flavor
 ```
 
-The first function we'll verify is used to tell us, for a given data frame (sent as records), and a given type, which columns are of that type.
+Let's call this *records* format, as opposed to data-frame format.
+You'll see that the records-format prints as JSON; this is a Python list, so the Dash server can send it back and forth between the server and the DOM.
+
+For me, the biggest thing to keep in mind (other than figuring out how Pandas works) is if data is formatted as records or as a data frame.
+ 
+The first function we'll verify is used to tell us, for a given a data frame and a given Pandas type, which columns are of that type.
+(In the app, we'll convert to records-format in the callback function.)
 
 ```{python}
-def cols_choice (data_records, include):
-    df = pd.DataFrame.from_dict(data_records)
+def cols_choice (df, include):
     col_names = df.select_dtypes(include=include).columns.to_list()
     
     return col_names
 ```
 
-Note that the first thing we do is reconstitute the Pandas data frame from the records.
-Return a list of column names that satisfies the predicate in `select_types()`.
-
 Let's test the function.
 In Pandas, strings have type `'object'`:
 
 ```{python}  
-cols_choice(penguins_records, 'object')
+cols_choice(penguins, 'object')
 ```
 
 Numbers have type `'number'`:
 
 ```{python}
-cols_choice(penguins_records, 'number')
+cols_choice(penguins, 'number')
 ```
 
 So far, so good.
@@ -222,8 +224,9 @@ So far, so good.
 Next, we need a function to generate the (display) table properties. 
 We need to return a list, with a dictionary for each column in the data frame.
 Each dictionary needs elements `'name` and `'id'`, each of which has the name of the column.
+As we'll see later, this is the format we need to specify the table headers.
 
-Note that we are being sent the records, rather than a the data frame. 
+Note that we are *not* using the data-frame format in this function, so we can keep everything in records format.
 We use a trick by looking at only the first (well, zeroth) record.
 
 ```{python}
@@ -240,21 +243,29 @@ cols_header(penguins_records)
 This seems OK.
 
 Finally, we need an aggregation function. 
-For convenience, we'll write this as in terms of data frames; we'll see later that we adapt this function to the callback, which uses records. 
+We send a data frame, then some lists of column-names, and a string naming an aggregation-function.
+This is an exercise in Pandas - I think this works, but my lack of experience in Pandas suggests there may be a "better" way.
+We'll write this as in terms of data frames; we'll convert to/from records-format in the callback function. 
 
 ```{python}
-def aggregate_df (df, cols_group, cols_agg, func_agg):
+agg_function_choices = ['mean', 'min', 'max']
+
+def aggregate_df (df, cols_group, cols_agg, func_agg,
+                  str_fn_choices = agg_function_choices):
+    
+    if not func_agg in str_fn_choices:
+        raise AssertionError(f"{func_agg} not a legal function-choice")
+  
     if (not cols_group is None):
         df = df.groupby(cols_group)
 
     if (cols_agg is None or len(cols_agg) == 0):
         return []
-    
+
     dict_agg = {}
     for col in cols_agg:
         dict_agg[col] = func_agg
     
-    # aggregate DataFrame
     df = df.agg(dict_agg).reset_index()
 
     return df
