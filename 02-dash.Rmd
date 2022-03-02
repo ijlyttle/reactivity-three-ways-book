@@ -18,7 +18,6 @@ Both Shiny and Dash use the idea of a reactive graph, which indicates what thing
 
  - In Dash, it is explicit, which is a mixed blessing. 
    
-   
 For Dash, this explicitness provides the flexibility to do a lot of things, but the price is that *you* have to specify:
 
   - all the DOM components (UI elements) in the layout.
@@ -128,29 +127,54 @@ The other option is to use base64 encoding; I have seen this used for uploading/
 
 ## Demonstration app
 
+I've tried to brief in outlining the priniciples for a Dash app; I think they will make more sense in the context of the Dash demo-app.
+
 ### Description
 
 Here is the reactive graph for the demonstration app.
 
-```{r echo=FALSE, fig.cap="Reactivity diagram"}
+It's a little busier than the Shiny app; Dash forces the developer to be explicit, Shiny makes some things implicit.
+
+```{r echo=FALSE, fig.cap="Reactivity diagram for Dash"}
 knitr::include_graphics("images/dash-aggregate-local.svg")
 ```
 
-Each rectangle is a layout component. 
-Each circle is a callback function.
+A few things to note about this diagram:
 
-```{r echo=FALSE, fig.cap="Legend"}
+ - Each rectangle is a layout component; each circle is a callback function.
+ 
+ - Components have properties, which are associated with arguments to callback functions.
+ 
+ - When an argument to a callback function changes, the function is (re-)run.
+ 
+ - The output(s) of callback functions are used to update the properties of components.
+ 
+ - Functions are run, properties are updated, and so on, until the app "comes to rest".
+
+There are a few more things formalized in the diagram, but we'll get to them as we discuss the demo app:
+
+```{r echo=FALSE, fig.cap="Legend: reactivity diagram for Dash"}
 knitr::include_graphics("images/dash-legend.svg")
 ```
 
-Information cannot flow from one component to another unless it goes through a callback function.
-
 ### Helper functions
+
+Just like in R, I like to write as much "vanilla" Python code as I can.
+I want to demonstrate to myself, as much as I can, that the "guts" of the app behaves as I expect.
+That way, when I'm building the components and the callbacks, I can narrow down the things that might be going wrong.
 
 ```{r}
 # using only to demonstrate code; not used in Python Dash.
 library("reticulate")
 ```
+
+I'm reproducing this code in an RMarkdown document, so I'm using the reticulate package to run Python.
+You will not need to do this to create a Dash app; you can work in a purely Python environment.
+
+In fact, if you are newish to Python, you might find the "Field Guide" appendix useful to get things set up.
+For Python programming, there is a great introduction at reticulate.
+
+Our first step is to get a look at the `penguins` dataset, to verify it's the same as we use in R.
 
 ```{python}
 import pandas as pd
@@ -160,20 +184,47 @@ penguins = load_penguins()
 print(penguins)
 ```
 
+Because we will tell Dash to move data back and forth using a dictionary, we'll make a variable that stores `penguins` as records:
+
 ```{python}
 penguins_records = penguins.to_dict('records')
+print(penguins_records[0:2]) # just to get a flavor
 ```
+
+The first function we'll verify is used to tell us, for a given data frame (sent as records), and a given type, which columns are of that type.
 
 ```{python}
 def cols_choice (data_records, include):
     df = pd.DataFrame.from_dict(data_records)
     col_names = df.select_dtypes(include=include).columns.to_list()
     
-    return [{'label': i, 'value': i} for i in col_names]
-  
+    return col_names
+```
+
+Note that the first thing we do is reconstitute the Pandas data frame from the records.
+Return a list of column names that satisfies the predicate in `select_types()`.
+
+Let's test the function.
+In Pandas, strings have type `'object'`:
+
+```{python}  
 cols_choice(penguins_records, 'object')
+```
+
+Numbers have type `'number'`:
+
+```{python}
 cols_choice(penguins_records, 'number')
 ```
+
+So far, so good.
+
+Next, we need a function to generate the (display) table properties. 
+We need to return a list, with a dictionary for each column in the data frame.
+Each dictionary needs elements `'name` and `'id'`, each of which has the name of the column.
+
+Note that we are being sent the records, rather than a the data frame. 
+We use a trick by looking at only the first (well, zeroth) record.
 
 ```{python}
 def cols_header (data_records):
@@ -185,6 +236,11 @@ def cols_header (data_records):
   
 cols_header(penguins_records)  
 ```
+
+This seems OK.
+
+Finally, we need an aggregation function. 
+For convenience, we'll write this as in terms of data frames; we'll see later that we adapt this function to the callback, which uses records. 
 
 ```{python}
 def aggregate_df (df, cols_group, cols_agg, func_agg):
@@ -210,6 +266,8 @@ aggregate_df(
   func_agg = "mean"
 )  
 ```
+
+Confident that the "guts" of the app works, we move onto the components and the callbacks.
 
 ### Compmonent layout
 
