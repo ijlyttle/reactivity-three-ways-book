@@ -24,7 +24,7 @@
 <meta name="author" content="Ian Lyttle" />
 
 
-<meta name="date" content="2022-03-02" />
+<meta name="date" content="2022-03-03" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -216,9 +216,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="1.2" data-path="demonstration-app.html"><a href="demonstration-app.html"><i class="fa fa-check"></i><b>1.2</b> Demonstration App</a>
 <ul>
 <li class="chapter" data-level="1.2.1" data-path="demonstration-app.html"><a href="demonstration-app.html#description"><i class="fa fa-check"></i><b>1.2.1</b> Description</a></li>
-<li class="chapter" data-level="1.2.2" data-path="demonstration-app.html"><a href="demonstration-app.html#helper-functions"><i class="fa fa-check"></i><b>1.2.2</b> Helper functions</a></li>
-<li class="chapter" data-level="1.2.3" data-path="demonstration-app.html"><a href="demonstration-app.html#ui"><i class="fa fa-check"></i><b>1.2.3</b> UI</a></li>
-<li class="chapter" data-level="1.2.4" data-path="demonstration-app.html"><a href="demonstration-app.html#server-function"><i class="fa fa-check"></i><b>1.2.4</b> Server function</a></li>
+<li class="chapter" data-level="1.2.2" data-path="demonstration-app.html"><a href="demonstration-app.html#prelims"><i class="fa fa-check"></i><b>1.2.2</b> Prelims</a></li>
+<li class="chapter" data-level="1.2.3" data-path="demonstration-app.html"><a href="demonstration-app.html#helper-functions"><i class="fa fa-check"></i><b>1.2.3</b> Helper functions</a></li>
+<li class="chapter" data-level="1.2.4" data-path="demonstration-app.html"><a href="demonstration-app.html#ui"><i class="fa fa-check"></i><b>1.2.4</b> UI</a></li>
+<li class="chapter" data-level="1.2.5" data-path="demonstration-app.html"><a href="demonstration-app.html#server-function"><i class="fa fa-check"></i><b>1.2.5</b> Server function</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="2" data-path="dash.html"><a href="dash.html"><i class="fa fa-check"></i><b>2</b> Dash</a>
@@ -233,9 +234,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="2.2" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html"><i class="fa fa-check"></i><b>2.2</b> Demonstration app</a>
 <ul>
 <li class="chapter" data-level="2.2.1" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#description-1"><i class="fa fa-check"></i><b>2.2.1</b> Description</a></li>
-<li class="chapter" data-level="2.2.2" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#helper-functions-1"><i class="fa fa-check"></i><b>2.2.2</b> Helper functions</a></li>
-<li class="chapter" data-level="2.2.3" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#compmonent-layout"><i class="fa fa-check"></i><b>2.2.3</b> Compmonent layout</a></li>
-<li class="chapter" data-level="2.2.4" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#callbacks"><i class="fa fa-check"></i><b>2.2.4</b> Callbacks</a></li>
+<li class="chapter" data-level="2.2.2" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#prelims-1"><i class="fa fa-check"></i><b>2.2.2</b> Prelims</a></li>
+<li class="chapter" data-level="2.2.3" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#helper-functions-1"><i class="fa fa-check"></i><b>2.2.3</b> Helper functions</a></li>
+<li class="chapter" data-level="2.2.4" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#compmonent-layout"><i class="fa fa-check"></i><b>2.2.4</b> Compmonent layout</a></li>
+<li class="chapter" data-level="2.2.5" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#callbacks"><i class="fa fa-check"></i><b>2.2.5</b> Callbacks</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="observable.html"><a href="observable.html"><i class="fa fa-check"></i><b>3</b> Observable</a></li>
@@ -301,12 +303,12 @@ For example, one way to store the state is in the UI of the app.</p>
 </blockquote>
 <p>Similarly, everything that exists on Dash app’s web page is a component.</p>
 <p>As we’ll see in the demo, a Dash app contains a layout that you specify:</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb31-1"><a href="principles-1.html#cb31-1" aria-hidden="true" tabindex="-1"></a>app.layout <span class="op">=</span> html.div(...)</span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb33-1"><a href="principles-1.html#cb33-1" aria-hidden="true" tabindex="-1"></a>app.layout <span class="op">=</span> html.div(...)</span></code></pre></div>
 <p>You need to fill in the <code>...</code>.
 A component might be a straightforward HTML element, or it might be a Dash component, where you define the attributes.</p>
 <p>The <code>html</code> object (imported from the <code>dash</code> package) behaves very similarly to R’s htmltools package; they are both based on the HTML5 spec.</p>
 <p>We’ll see more in the demo, but here’s an example of a Dash component:</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb32-1"><a href="principles-1.html#cb32-1" aria-hidden="true" tabindex="-1"></a>dcc.Dropdown(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;cols-group&#39;</span>, multi<span class="op">=</span><span class="va">True</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb34-1"><a href="principles-1.html#cb34-1" aria-hidden="true" tabindex="-1"></a>dcc.Dropdown(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;cols-group&#39;</span>, multi<span class="op">=</span><span class="va">True</span>)</span></code></pre></div>
 <p>This is a <a href="https://dash.plotly.com/dash-core-components/dropdown">dropdown component</a>; we define the <code>id</code> and <code>multi</code> properties at definition.
 In this case, we don’t define the <code>options</code> or <code>value</code> properties. We’ll update the <code>options</code> dynamically, and let the user set the <code>value</code>.</p>
 <p>Like other components, dropdowns have a number of <a href="https://dash.plotly.com/dash-core-components/dropdown#dropdown-properties">properties</a>; we can set them either at initialization, as we did here, or we can set them using a callback.</p>
@@ -318,10 +320,10 @@ In this case, we don’t define the <code>options</code> or <code>value</code> p
 Dash lets you write callbacks using Python.
 It also lets you write callbacks in JavaScript, but that gets beyond the scope of this book.</p>
 <p>We’ll see this in more detail in the demo app, but a callback is a standard Python function with a decorator:</p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb33-1"><a href="principles-1.html#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.callback</span>(Output(<span class="st">&#39;cols-group&#39;</span>, <span class="st">&#39;options&#39;</span>),</span>
-<span id="cb33-2"><a href="principles-1.html#cb33-2" aria-hidden="true" tabindex="-1"></a>              Input(<span class="st">&#39;inp&#39;</span>, <span class="st">&#39;data&#39;</span>))</span>
-<span id="cb33-3"><a href="principles-1.html#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> update_cols_group(data_records):</span>
-<span id="cb33-4"><a href="principles-1.html#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cols_choice(data_records, <span class="st">&#39;object&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb35-1"><a href="principles-1.html#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.callback</span>(Output(<span class="st">&#39;cols-group&#39;</span>, <span class="st">&#39;options&#39;</span>),</span>
+<span id="cb35-2"><a href="principles-1.html#cb35-2" aria-hidden="true" tabindex="-1"></a>              Input(<span class="st">&#39;inp&#39;</span>, <span class="st">&#39;data&#39;</span>))</span>
+<span id="cb35-3"><a href="principles-1.html#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> update_cols_group(data_records):</span>
+<span id="cb35-4"><a href="principles-1.html#cb35-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cols_choice(data_records, <span class="st">&#39;object&#39;</span>)</span></code></pre></div>
 <p>The decorator, <code>@app.callback(...)</code> tells Dash which layout components to map to the function’s inputs and outputs.
 When an <code>Input()</code> changes:</p>
 <ul>
@@ -345,14 +347,34 @@ Your options are:</p>
 </ul>
 <p>We’ll use the first option here.
 Here’s one of the components in our layout:</p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb34-1"><a href="principles-1.html#cb34-1" aria-hidden="true" tabindex="-1"></a>dcc.Store(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;inp&#39;</span>, data<span class="op">=</span>penguins.to_dict(<span class="st">&#39;records&#39;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb36-1"><a href="principles-1.html#cb36-1" aria-hidden="true" tabindex="-1"></a>dcc.Store(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;inp&#39;</span>, data<span class="op">=</span>penguins.to_dict(<span class="st">&#39;records&#39;</span>))</span></code></pre></div>
 <p>Note that this component is initialized using the <code>penguins</code> data, but that we are using pandas’ <code>to_dict()</code> method.
 This is because the component will receive the data using JSON; it is stored in the DOM as a JavaScript object.</p>
 </div>
 <div id="use-json-or-base64" class="section level3" number="2.1.4">
 <h3><span class="header-section-number">2.1.4</span> Use JSON or base64</h3>
 <p>The final thing to keep in mind is that when we communicate data between the browser DOM and the callback functions, it does not use native Python objects. Instead, from the Python callback-functions’ perspective, data is serialized to JSON when sent to the DOM, and deserialized from JSON when received from the DOM.</p>
-<p>For Python dictionaries and lists containing numbers and strings, the serialization process is implied. For data frames, you have to be specific, using <code>to_dict()</code> or <code>from_dict()</code>.</p>
+<p>For Python dictionaries and lists containing numbers and strings, the serialization process is implied.</p>
+<p>There are (at least) a couple of conventions for serializing a data frame to JSON: by row or by column.</p>
+<p>Coming from R, you may think of a data frame as a list of vectors, each of the same length.
+This is column-based, for example:</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb37-1"><a href="principles-1.html#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb37-2"><a href="principles-1.html#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;species&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;Adelie&quot;</span><span class="ot">,</span> <span class="st">&quot;Adelie&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb37-3"><a href="principles-1.html#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;bill_length_mm&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="fl">39.1</span><span class="ot">,</span> <span class="fl">18.7</span><span class="ot">]</span></span>
+<span id="cb37-4"><a href="principles-1.html#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Alternatively, the row-based approach:</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb38-1"><a href="principles-1.html#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="ot">[</span></span>
+<span id="cb38-2"><a href="principles-1.html#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">{</span><span class="dt">&quot;species&quot;</span><span class="fu">:</span> <span class="st">&quot;Adelie&quot;</span><span class="fu">,</span> <span class="dt">&quot;bill_length_mm&quot;</span><span class="fu">:</span> <span class="fl">39.1</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb38-3"><a href="principles-1.html#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">{</span><span class="dt">&quot;species&quot;</span><span class="fu">:</span> <span class="st">&quot;Adelie&quot;</span><span class="fu">,</span> <span class="dt">&quot;bill_length_mm&quot;</span><span class="fu">:</span> <span class="fl">18.7</span><span class="fu">}</span></span>
+<span id="cb38-4"><a href="principles-1.html#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="ot">]</span></span></code></pre></div>
+<p>The row-based approach seems to be the convention in Dash; this is the approach used by D3.
+Here, we think of a data frame as a collection of <em>records</em>.
+To serialize from Pandas, we’ll use <code>to_dict('records')</code>; to deserialize (import) into Pandas, we’ll use <code>from_dict()</code>.</p>
+<p>In the context of the Python code, I’ll refer to data formats as either:</p>
+<ul>
+<li><em>data-frame</em> format, i.e. Pandas data frame</li>
+<li><em>records</em> format, i.e. JSON collection of records</li>
+</ul>
 <p>The other option is to use base64 encoding; I have seen this used for uploading/downloading text files, e.g. CSV or JSON files.</p>
 </div>
 </div>

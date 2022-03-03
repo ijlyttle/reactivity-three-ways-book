@@ -2,8 +2,8 @@ fig:unnamed-chunk-1
 fig:unnamed-chunk-2
 fig:unnamed-chunk-8
 fig:unnamed-chunk-9
-fig:unnamed-chunk-19
-fig:unnamed-chunk-20
+fig:unnamed-chunk-21
+fig:unnamed-chunk-22
 shiny
 principles
 pure-functions-vs.-side-effects
@@ -11,6 +11,7 @@ reactives-vs.-observers
 using-tidyverse-functions
 demonstration-app
 description
+prelims
 helper-functions
 ui
 inputs
@@ -27,6 +28,7 @@ server-cannot-store-state
 use-json-or-base64
 demonstration-app-1
 description-1
+prelims-1
 helper-functions-1
 compmonent-layout
 callbacks
