@@ -129,6 +129,34 @@ For example, the reactive-expression `agg` is updated only when the `button` is 
 Spend some time to study the app, to make sure that these diagrams agree with your understanding of how the app operates.
 In the following sections, we'll discuss how to implement in your Shiny code.
 
+### Prelims
+
+In the rest of this chapter, we'll highlight the code used to make app, and the design choices behind the code.
+In the [repository](https://github.com/ijlyttle/reactivity-demo-shiny), there are a couple of files to pay attention to:
+
+```
+app-aggregate-local.R
+R/
+  aggregate-local.R
+```
+
+Here's the start of the app file, `app-aggregate-local.R`:
+
+```{r prelims, eval=FALSE}
+library("shiny")
+
+# ------------------- 
+# global functions
+# ------------------- 
+#
+# created outside of reactive environment, making it easier:
+#   - to test
+#   - to migrate to a package
+source("./R/aggregate-local.R")
+```
+
+As you can see, it sources `R/aggregate-local.R`, which contains our helper functions.
+
 ### Helper functions
 
 Before writing a Shiny app, I like to write out a set of non-reactive functions that will do the "heavy lifting". 
@@ -138,6 +166,7 @@ I keep these functions in an `R` folder alongside my app; here's a [link](https:
 Just like in the app, we'll use the [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/) dataset:
 
 ```{r penguins}
+# this is not part of the helper functions - it's for exposition here
 library("palmerpenguins")
 library("tibble")
 

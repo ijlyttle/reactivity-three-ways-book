@@ -119,9 +119,39 @@ This is because the component will receive the data using JSON; it is stored in 
 
 ### Use JSON or base64
 
-The final thing to keep in mind is that when we communicate data between the browser DOM and the callback functions, it does not use native Python objects. Instead, from the Python callback-functions' perspective, data is serialized to JSON when sent to the DOM, and deserialized from JSON when received from the DOM. 
+The final thing to keep in mind is that when we communicate data between the browser DOM and the callback functions, it does not use native Python objects. Instead, from the Python callback-functions' perspective, data is serialized to JSON when sent to the DOM, and deserialized from JSON when received from the DOM.
 
-For Python dictionaries and lists containing numbers and strings, the serialization process is implied. For data frames, you have to be specific, using `to_dict()` or `from_dict()`.
+For Python dictionaries and lists containing numbers and strings, the serialization process is implied. 
+
+There are (at least) a couple of conventions for serializing a data frame to JSON: by row or by column.
+
+Coming from R, you may think of a data frame as a list of vectors, each of the same length. 
+This is column-based, for example: 
+
+```json
+{
+  "species": ["Adelie", "Adelie"],
+  "bill_length_mm": [39.1, 18.7]
+}
+```
+
+Alternatively, the row-based approach:
+
+```json
+[
+  {"species": "Adelie", "bill_length_mm": 39.1},
+  {"species": "Adelie", "bill_length_mm": 18.7}
+]
+```
+
+The row-based approach seems to be the convention in Dash; this is the approach used by D3.
+Here, we think of a data frame as a collection of *records*. 
+To serialize from Pandas, we'll use `to_dict('records')`; to deserialize (import) into Pandas, we'll use `from_dict()`.
+
+In the context of the Python code, I'll refer to data formats as either:
+
+ - *data-frame* format, i.e. Pandas data frame
+ - *records* format, i.e. JSON collection of records
 
 The other option is to use base64 encoding; I have seen this used for uploading/downloading text files, e.g. CSV or JSON files.
 
@@ -157,6 +187,81 @@ There are a few more things formalized in the diagram, but we'll get to them as 
 knitr::include_graphics("images/dash-legend.svg")
 ```
 
+### Prelims
+
+As with Shiny, in the rest of this chapter, we'll highlight the code used to make app, and the design choices behind the code.
+In the [repository](https://github.com/ijlyttle/reactivity-demo-dash), there are a some files to pay attention to:
+
+```
+app-aggregate-local.py
+helpers/
+  __init__.py
+  aggregate.py
+  cols.py
+```
+
+Here's the app file, `app-aggregate-local.py`, with the components and callbacks removed:
+
+```{python eval=FALSE}
+# Run this app with `python app-aggregate-local.py` and
+# visit http://127.0.0.1:8050/ in your web browser.
+
+import dash
+from dash.dependencies import Input, Output, State
+from dash import dash_table
+from dash import html
+from dash import dcc
+import dash_bootstrap_components as dbc
+
+import pandas as pd
+from palmerpenguins import load_penguins
+
+from helpers.aggregate import aggregate_df, agg_function_choices
+from helpers.cols import cols_choice, cols_header
+
+penguins = load_penguins()
+
+app = dash.Dash(
+    __name__, 
+    external_stylesheets=[dbc.themes.BOOTSTRAP]
+)
+
+# make `server` available to Heroku
+server = app.server
+
+# <component layout>
+
+# <callback functions>
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
+```
+
+The first part of the file handles the imports. 
+You will need to have installed (hopefully in your virtual environment): `dash`, `dash_bootstrap_components`, `pandas`, and `palmerpenguins`.
+For example:
+
+```
+> pip install dash
+```
+
+The remaining bits of the file set up our app:
+
+  - Load the `penguins` data.
+
+  - Create the `app`.
+    This is the standard way to create a Dash app; note that we are using the Bootstrap styling.
+    
+  - We make the `app.server` available at the top level as `server`.
+    This goes a little beyond the scope of this chapter, but we are doing this as a part of deploying the app on Heroku.
+    
+  - Components and callbacks, we'll look at these in detail in following sections.
+  
+  - A standard bit of code that tells Python to `app.runServer()` when we execute this file.
+
+We also have a `helpers` directory with some files. 
+The `__init__.py` file is empty; its purpose is to signal to Python that there are `.py` files in this directory with functions that can be imported.
+  
 ### Helper functions
 
 Just like in R, I like to write as much "vanilla" Python code as I can.
@@ -177,6 +282,7 @@ For Python programming, there is a great introduction at reticulate.
 Our first step is to get a look at the `penguins` dataset, to verify it's the same as we use in R.
 
 ```{python}
+# importing into RMarkdown environment for exposition
 import pandas as pd
 from palmerpenguins import load_penguins
 
@@ -191,11 +297,6 @@ penguins_records = penguins.to_dict('records')
 print(penguins_records[0:2]) # just to get a flavor
 ```
 
-Let's call this *records* format, as opposed to data-frame format.
-You'll see that the records-format prints as JSON; this is a Python list, so the Dash server can send it back and forth between the server and the DOM.
-
-For me, the biggest thing to keep in mind (other than figuring out how Pandas works) is if data is formatted as records or as a data frame.
- 
 The first function we'll verify is used to tell us, for a given a data frame and a given Pandas type, which columns are of that type.
 (In the app, we'll convert to records-format in the callback function.)
 
@@ -282,12 +383,18 @@ Confident that the "guts" of the app works, we move onto the components and the 
 
 ### Compmonent layout
 
+Let's start with the formatting. 
+In the app, we need to create an `app.layout`, which will be the HTML used to render our app in the browser.
+Just like with Shiny, we're using Bootstrap, but we have to be a little more explicit.
+In Shiny, Bootstrap is "baked in"; in Dash, it's an add-on.
+
+Here's the "formatting" bits of the layout; the `...` represent Dash components that we'll discuss presently:
+
 ```{python eval=FALSE}
 app.layout = html.Div(
     className='container-fluid',
     children=[
-        dcc.Store(id='inp', data=penguins.to_dict('records')),
-        dcc.Store(id='agg', data=[]),
+        ...
         html.H2('Aggregator'),
         html.Div(
             className='row',
@@ -318,6 +425,20 @@ app.layout = html.Div(
     ]
 ) 
 ```
+
+The first parts I want to highlight are the data stores:
+
+```{python eval=FALSE}
+dcc.Store(id='inp', data=penguins.to_dict('records')),
+dcc.Store(id='agg', data=[])
+```
+
+Recall that the server part of a Dash app cannot store its state. 
+Instead, we will store the state, in our case: the input and aggregated data, in the DOM.
+Dash provides a `dcc.Store()` component; in its `data` property, we store the records-based data (note the use of `.to_dict('records')`.
+
+
+
 
 
 ### Callbacks
