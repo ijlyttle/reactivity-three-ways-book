@@ -444,6 +444,8 @@ app.layout = html.Div(
 ) 
 ```
 
+#### Data stores
+
 The first parts I want to highlight are the data stores:
 
 ```{python eval=FALSE}
@@ -455,6 +457,9 @@ Recall that the server part of a Dash app cannot store its state.
 Instead, we will store the state, in our case: the input and aggregated data, in the DOM.
 Dash provides a `dcc.Store()` component; in its `data` property, we store the records-based data (note the use of `.to_dict('records')`.
 Also note that, just like Shiny, components each have an `id` property.
+
+
+#### Inputs
 
 Let's look at the components that specify the aggregation:
 
@@ -485,6 +490,8 @@ You'll note another appearance of `list(map())` where we set the `options`.
 Note also that we can apply Bootstrap classes to`dbc.Button()`.
 What we might think of as a label is specified as the `children` of the button element.
 
+#### Outputs
+
 It remains to look at the data tables. 
 There are two tables, identical in form; we will examine only one of them:
 
@@ -500,15 +507,40 @@ The properties here are straightforward: we need an `id`, we want to show ten en
 
 We will populate the data tables using callback functions.
 
-### Callbacks
+### Callback functions
+
+In Dash, callback functions are just regular functions with decorators. 
+Here's a very generic example:
 
 ```{python eval=FALSE}
-@app.callback(Output('table-inp', 'columns'),
-              Output('table-inp', 'data'),
-              Input('inp', 'data'))
-def update_table_inp(data_records):
-     return cols_header(data_records), data_records  
+@app.callback(Output('output-component', 'output-property'),
+              Input('input-component', 'input-property'))
+def some_function_name(x):
+    y = some_function(x)
+    
+    return y
 ```
+
+The decorator tells Dash how to build a function that wraps the "actual" function.
+We are not concerned with the implementation; we are interested in the interface.
+
+The decorator is this bit of code: `@app.callback()`. 
+It takes a series of arguments which map to the function's parameters and return values:
+
+  - `Output('output-component', 'output-property')` is mapped to the return value.
+  - `Input('input-component', 'input-property')` is mapped to the `x` parameter.
+
+This tells Dash that whenever the `input-property` of the `input-component` changes, it should:
+
+  - run the function using the `input-property` as an argument, then 
+  - send the return value to the `output-property` of the `output-component`
+
+We'll see some more-complex cases in the following examples.
+
+#### Inputs
+
+We have a couple of input components that need updating: the grouping columns and the aggregation columns.
+Each has its own callback, but they are virtually identical, so I'll describe only one.
 
 ```{python eval=FALSE}
 @app.callback(Output('cols-group', 'options'),
@@ -518,13 +550,16 @@ def update_cols_group(data_records):
     return cols_choice(df, 'object')
 ```
 
-```{python eval=FALSE}
-@app.callback(Output('cols-agg', 'options'),
-              Input('inp', 'data'))
-def update_cols_agg(data_records):
-    df = pd.DataFrame.from_dict(data_records)
-    return cols_choice(df, 'number')
-```
+Whenever the `inp` `data` changes:
+
+- the function is called using the input data (in records form).
+- the function converts to data-frame format, then 
+- uses our helper function to determine the columns that have string values.
+- it returns a list of column names, which Dash uses to update the `cols-group` `options`.
+
+#### Calculations
+
+The callback that performs the aggregation has more going on, but we'll get to the bottom of it.
 
 ```{python eval=FALSE}
 @app.callback(Output('agg', 'data'),
@@ -544,3 +579,38 @@ def aggregate(n_clicks, data_records, cols_group, cols_agg, func_agg):
     # serialize DataFrame
     return df_new.to_dict('records')
 ```
+
+A couple of things to sort through:
+
+ - The function has five parameters; the decorator has one `Input()` and four instances of `State()`.
+
+ - The decorator is provided an additional argument: `prevent_initial_call`.
+
+A `State()` is similar to an `Input()`; the difference that the function is **not** run in response to a `State()` change.
+In this case, the function is run *only* in response to the value of the button changing, i.e. being clicked.
+
+The `prevent_inital_call` argument describes itself well. 
+By setting it to `True`, we ensure that the only way the aggregation function will be run is when the button is clicked.
+
+Finally note that we convert our input records into a data frame, then use records-format for the return value.
+
+#### Outputs
+
+The final set of callbacks is for our data tables. 
+Again, although we have two data tables, the callbacks are virtually identical, so I'll highlight only one.
+
+```{python eval=FALSE}
+@app.callback(Output('table-inp', 'columns'),
+              Output('table-inp', 'data'),
+              Input('inp', 'data'))
+def update_table_inp(data_records):
+     return cols_header(data_records), data_records  
+```
+
+The thing to note there is that Dash and Python support multiple return-values, mapping each to an `Output()`.
+
+This situation merits multiple return-values because a Dash data table has a properties for `data` and `columns` (headers).
+This information comes from the same source, so it made sense to use multiple return-values.
+
+Certainly, you could write two callbacks to do the same things; writing a single callback made more sense to me.
+Of course, you should do what makes sense to you.

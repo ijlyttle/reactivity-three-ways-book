@@ -388,7 +388,7 @@ column(
 This may be a habit particular to me, but I like to organize a server-function into groups:
 
 ```{r server_overview, eval=FALSE}
-server <- function(input, output, session) 
+server <- function(input, output, session) {
   # input observers
   # reactive expressions and values
   # outputs
