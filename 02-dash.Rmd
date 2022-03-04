@@ -397,6 +397,25 @@ aggregate_df(
 )  
 ```
 
+This may be interesting only to me, but there is a more "functional" way to write the statement:
+
+```{python eval=FALSE}
+dict_agg = {i: func_agg for i in cols_agg}
+```
+
+We would need to `import functools`, then use a reducer:
+
+```{python eval=FALSE} 
+def append(dictionary, key):
+    dictionary[key] = func_agg
+    return dictionary
+
+dict_agg = functools.reduce(append, cols_agg, {})
+```
+
+In this situation, it's more verbose and, I think, less clear what is going on unless you are into functional programming.
+Please pardon this diversion.
+
 Confident that the "guts" of the app works, we move onto the components and the callbacks.
 
 ### Compmonent layout
