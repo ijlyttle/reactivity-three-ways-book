@@ -2,8 +2,8 @@ fig:unnamed-chunk-1
 fig:unnamed-chunk-2
 fig:unnamed-chunk-8
 fig:unnamed-chunk-9
-fig:unnamed-chunk-21
-fig:unnamed-chunk-22
+fig:unnamed-chunk-29
+fig:unnamed-chunk-30
 shiny
 principles
 pure-functions-vs.-side-effects
