@@ -323,8 +323,7 @@ cols_choice(penguins, 'number')
 So far, so good.
 
 Next, we need a function to generate the (display) table properties. 
-We need to return a list, with a dictionary for each column in the data frame.
-Each dictionary needs elements `'name` and `'id'`, each of which has the name of the column.
+We need to return a list where each element is dictionary that describes a column in the data frame.
 As we'll see later, this is the format we need to specify the table headers.
 
 Note that we are *not* using the data-frame format in this function, so we can keep everything in records format.
@@ -332,16 +331,36 @@ We use a trick by looking at only the first (well, zeroth) record.
 
 ```{python}
 def cols_header (data_records):
-    cols = []
-    if (len(data_records) > 0):
-        cols = [{'name': i, 'id': i} for i in data_records[0].keys()]
-
-    return cols
   
+    if (len(data_records) == 0):
+        return []
+
+    col_names = data_records[0].keys()
+    cols = list(
+      map(lambda i: {'name': i, 'id': i}, col_names)
+    )
+    
+    return cols
+```
+
+There's all sorts of ways to do this in Python.
+I'm a sucker for functional programming, so I'm using a `map()` function.
+This returns a map object, so we need to change it to a list.
+
+This works largely like R's `purrr::map()`, but in Python, we provide the function first, then the thing we are iterating over.
+Here's a purrr equivalent:
+
+```{r eval=FALSE}
+purrr::map(col_names, ~list(name = .x, id = .x))
+```
+
+Anyhow, let's try out our Python function:
+
+```{python}
 cols_header(penguins_records)  
 ```
 
-This seems OK.
+This seems OK. 
 
 Finally, we need an aggregation function. 
 We send a data frame, then some lists of column-names, and a string naming an aggregation-function.
@@ -357,15 +376,14 @@ def aggregate_df (df, cols_group, cols_agg, func_agg,
     if not func_agg in str_fn_choices:
         raise AssertionError(f"{func_agg} not a legal function-choice")
   
-    if (not cols_group is None):
+    if (cols_group != None):
         df = df.groupby(cols_group)
 
-    if (cols_agg is None or len(cols_agg) == 0):
+    if (cols_agg == None or len(cols_agg) == 0):
         return []
-
-    dict_agg = {}
-    for col in cols_agg:
-        dict_agg[col] = func_agg
+    
+    # dictionary, keys: column-names, values: function-name
+    dict_agg = {i: func_agg for i in cols_agg}
     
     df = df.agg(dict_agg).reset_index()
 
@@ -436,9 +454,93 @@ dcc.Store(id='agg', data=[])
 Recall that the server part of a Dash app cannot store its state. 
 Instead, we will store the state, in our case: the input and aggregated data, in the DOM.
 Dash provides a `dcc.Store()` component; in its `data` property, we store the records-based data (note the use of `.to_dict('records')`.
+Also note that, just like Shiny, components each have an `id` property.
 
+Let's look at the components that specify the aggregation:
 
+```{python eval=FALSE}
+dcc.Dropdown(id='cols-group', multi=True),
+dcc.Dropdown(id='cols-agg', multi=True),
+dbc.Select(
+    id='func-agg',
+    options=list(
+      map(lambda i: {'label': i, 'value': i}, agg_function_choices)
+    ),
+    value=agg_function_choices[0]
+),
+dbc.Button(id='button-agg', children='Submit', class_name='btn btn-secondary')
+```
 
+Here, we're using a couple of "standard" (`dcc`) dropdowns and a couple of Bootstrap (`dbc`) components.
 
+With the dropdowns, other than providing the `id`, we specify that multiple selections can be made.
+We don't populate the options; we'll do this using a callback. 
+If we were only ever going to use one input-dataset, in this case `penguins`, it might make sense to populate the `options` when defining the component.
+Populating using a callback function makes our code more general, allowing the case where we could upload an abitrary dataset.
+Perhaps it wasn't necessary to follow the more-general approach here, but it allowed me to learn more about how Dash works.
+
+We define our `dbc.Select()` component completely in the layout. 
+You'll note another appearance of `list(map())` where we set the `options`.
+
+Note also that we can apply Bootstrap classes to`dbc.Button()`.
+What we might think of as a label is specified as the `children` of the button element.
+
+It remains to look at the data tables. 
+There are two tables, identical in form; we will examine only one of them:
+
+```{python eval=FALSE}
+dash_table.DataTable(
+    id='table-inp',
+    page_size=10,
+    sort_action='native'
+)
+```
+
+The properties here are straightforward: we need an `id`, we want to show ten entries at a time, `sort_action='native'` indicates that we want sorting to be available (and for Dash to take care of it).
+
+We will populate the data tables using callback functions.
 
 ### Callbacks
+
+```{python eval=FALSE}
+@app.callback(Output('table-inp', 'columns'),
+              Output('table-inp', 'data'),
+              Input('inp', 'data'))
+def update_table_inp(data_records):
+     return cols_header(data_records), data_records  
+```
+
+```{python eval=FALSE}
+@app.callback(Output('cols-group', 'options'),
+              Input('inp', 'data'))
+def update_cols_group(data_records):
+    df = pd.DataFrame.from_dict(data_records)
+    return cols_choice(df, 'object')
+```
+
+```{python eval=FALSE}
+@app.callback(Output('cols-agg', 'options'),
+              Input('inp', 'data'))
+def update_cols_agg(data_records):
+    df = pd.DataFrame.from_dict(data_records)
+    return cols_choice(df, 'number')
+```
+
+```{python eval=FALSE}
+@app.callback(Output('agg', 'data'),
+              Input('button-agg', 'n_clicks'),
+              State('inp', 'data'),
+              State('cols-group', 'value'),
+              State('cols-agg', 'value'),
+              State('func-agg', 'value'),
+              prevent_initial_call=True)
+def aggregate(n_clicks, data_records, cols_group, cols_agg, func_agg):
+    # create DataFrame
+    df = pd.DataFrame.from_dict(data_records)
+
+    # aggregate
+    df_new = aggregate_df(df, cols_group, cols_agg, func_agg)
+
+    # serialize DataFrame
+    return df_new.to_dict('records')
+```
