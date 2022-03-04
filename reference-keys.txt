@@ -31,7 +31,13 @@ description-1
 prelims-1
 helper-functions-1
 compmonent-layout
-callbacks
+data-stores
+inputs-1
+outputs-2
+callback-functions
+inputs-2
+calculations
+outputs-3
 observable
 stray-thoughts
 field-guide-to-python

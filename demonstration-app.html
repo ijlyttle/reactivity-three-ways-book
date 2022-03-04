@@ -237,7 +237,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="2.2.2" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#prelims-1"><i class="fa fa-check"></i><b>2.2.2</b> Prelims</a></li>
 <li class="chapter" data-level="2.2.3" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#helper-functions-1"><i class="fa fa-check"></i><b>2.2.3</b> Helper functions</a></li>
 <li class="chapter" data-level="2.2.4" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#compmonent-layout"><i class="fa fa-check"></i><b>2.2.4</b> Compmonent layout</a></li>
-<li class="chapter" data-level="2.2.5" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#callbacks"><i class="fa fa-check"></i><b>2.2.5</b> Callbacks</a></li>
+<li class="chapter" data-level="2.2.5" data-path="demonstration-app-1.html"><a href="demonstration-app-1.html#callback-functions"><i class="fa fa-check"></i><b>2.2.5</b> Callback functions</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="observable.html"><a href="observable.html"><i class="fa fa-check"></i><b>3</b> Observable</a></li>
@@ -522,11 +522,11 @@ We’ll do this in the server function, where we update the <code>choices</code>
 <div id="server-function" class="section level3" number="1.2.5">
 <h3><span class="header-section-number">1.2.5</span> Server function</h3>
 <p>This may be a habit particular to me, but I like to organize a server-function into groups:</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="demonstration-app.html#cb28-1" aria-hidden="true" tabindex="-1"></a>server <span class="ot">&lt;-</span> <span class="cf">function</span>(input, output, session) </span>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="demonstration-app.html#cb28-1" aria-hidden="true" tabindex="-1"></a>server <span class="ot">&lt;-</span> <span class="cf">function</span>(input, output, session) {</span>
 <span id="cb28-2"><a href="demonstration-app.html#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># input observers</span></span>
 <span id="cb28-3"><a href="demonstration-app.html#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># reactive expressions and values</span></span>
 <span id="cb28-4"><a href="demonstration-app.html#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># outputs</span></span>
-<span id="cb28-5"><a href="demonstration-app.html#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="er">}</span>  </span></code></pre></div>
+<span id="cb28-5"><a href="demonstration-app.html#cb28-5" aria-hidden="true" tabindex="-1"></a>}  </span></code></pre></div>
 <div id="input-observers" class="section level4" number="1.2.5.1">
 <h4><span class="header-section-number">1.2.5.1</span> Input observers</h4>
 <p>There are two inputs: <code>cols_group</code> and <code>cols_agg</code>, whose <code>choices</code> change when the input data-frame changes.</p>
