@@ -403,14 +403,18 @@ This may be interesting only to me, but there is a more "functional" way to writ
 dict_agg = {i: func_agg for i in cols_agg}
 ```
 
-We would need to `import functools`, then use a reducer:
+Using a reducer:
 
 ```{python eval=FALSE} 
-def append(dictionary, key):
-    dictionary[key] = func_agg
-    return dictionary
+from functools import reduce
 
-dict_agg = functools.reduce(append, cols_agg, {})
+def build (acc, val):
+  new_dict = dict(acc)
+  new_dict[val] = func_agg
+  
+  return new_dict
+
+dict_agg = reduce(build, cols_agg, {})
 ```
 
 In this situation, it's more verbose and, I think, less clear what is going on unless you are into functional programming.
