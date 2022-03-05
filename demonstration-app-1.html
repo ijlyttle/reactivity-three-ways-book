@@ -24,7 +24,7 @@
 <meta name="author" content="Ian Lyttle" />
 
 
-<meta name="date" content="2022-03-04" />
+<meta name="date" content="2022-03-05" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -470,12 +470,16 @@ We’ll write this as in terms of data frames; we’ll convert to/from records-f
 ## 2  Torgersen       38.950980      18.429412</code></pre>
 <p>This may be interesting only to me, but there is a more “functional” way to write the statement:</p>
 <div class="sourceCode" id="cb58"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb58-1"><a href="demonstration-app-1.html#cb58-1" aria-hidden="true" tabindex="-1"></a>dict_agg <span class="op">=</span> {i: func_agg <span class="cf">for</span> i <span class="kw">in</span> cols_agg}</span></code></pre></div>
-<p>We would need to <code>import functools</code>, then use a reducer:</p>
-<div class="sourceCode" id="cb59"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb59-1"><a href="demonstration-app-1.html#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> append(dictionary, key):</span>
-<span id="cb59-2"><a href="demonstration-app-1.html#cb59-2" aria-hidden="true" tabindex="-1"></a>    dictionary[key] <span class="op">=</span> func_agg</span>
-<span id="cb59-3"><a href="demonstration-app-1.html#cb59-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dictionary</span>
-<span id="cb59-4"><a href="demonstration-app-1.html#cb59-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb59-5"><a href="demonstration-app-1.html#cb59-5" aria-hidden="true" tabindex="-1"></a>dict_agg <span class="op">=</span> functools.<span class="bu">reduce</span>(append, cols_agg, {})</span></code></pre></div>
+<p>Using a reducer:</p>
+<div class="sourceCode" id="cb59"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb59-1"><a href="demonstration-app-1.html#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> functools <span class="im">import</span> <span class="bu">reduce</span></span>
+<span id="cb59-2"><a href="demonstration-app-1.html#cb59-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-3"><a href="demonstration-app-1.html#cb59-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build (acc, val):</span>
+<span id="cb59-4"><a href="demonstration-app-1.html#cb59-4" aria-hidden="true" tabindex="-1"></a>  new_dict <span class="op">=</span> <span class="bu">dict</span>(acc)</span>
+<span id="cb59-5"><a href="demonstration-app-1.html#cb59-5" aria-hidden="true" tabindex="-1"></a>  new_dict[val] <span class="op">=</span> func_agg</span>
+<span id="cb59-6"><a href="demonstration-app-1.html#cb59-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb59-7"><a href="demonstration-app-1.html#cb59-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> new_dict</span>
+<span id="cb59-8"><a href="demonstration-app-1.html#cb59-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-9"><a href="demonstration-app-1.html#cb59-9" aria-hidden="true" tabindex="-1"></a>dict_agg <span class="op">=</span> <span class="bu">reduce</span>(build, cols_agg, {})</span></code></pre></div>
 <p>In this situation, it’s more verbose and, I think, less clear what is going on unless you are into functional programming.
 Please pardon this diversion.</p>
 <p>Confident that the “guts” of the app works, we move onto the components and the callbacks.</p>
