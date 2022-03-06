@@ -39,6 +39,15 @@ inputs-2
 calculations
 outputs-3
 observable
+principles-2
+hosted-service-runs-in-browser
+reactivity-baked-in
+javascript
+tidyverse-thinking-helps
+demonstration-app-2
+showcase
+workshop
+appendix
 stray-thoughts
 field-guide-to-python
 python-installation
