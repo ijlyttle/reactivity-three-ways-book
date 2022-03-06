@@ -1,6 +1,37 @@
 # Observable
 
-A few words on Observable.
+Compared with Shiny and Dash, Observable seems like another world:
+
+ - It is generally used as a hosted service.
+ 
+ - Virtually everything runs in the user's browser.
+ 
+ - Reactivity is baked in to everything.
+ 
+ - It uses (a very close approximation to) JavaScript.
+ 
+That said, there's a few things from your R and tidyverse world that may help you get acquainted:
+
+ - Functional-programming ideas translate well from R to JavaScript.
+ 
+ - There are a couple of "dplyr/tidyr"-like packages in JavaScript: arquero and tidyjs.
+ 
+ - There are a couple of JavaScript visualization packages that use grammar-of-graphics: Vega-Lite and Plot.
+ 
+I try to keep in mind that the point of the exercise, largely, is to "do stuff to data frames".
+Knowing how to "do stuff" and "think about stuff" using tidyverse makes it easier for me to figure out the same "stuff" elsewhere.
+
+## Principles
+
+### Hosted service runs in browser
+
+### Reactivity baked in
+
+### JavaScript
+
+### Tidyverse thinking helps
+
+## Demonstration app
 
 ```{r echo=FALSE, fig.cap="Reactivity diagram"}
 knitr::include_graphics("images/observable-aggregate-local.svg")
@@ -9,3 +40,9 @@ knitr::include_graphics("images/observable-aggregate-local.svg")
 ```{r echo=FALSE, fig.cap="Legend"}
 knitr::include_graphics("images/observable-legend.svg")
 ```
+
+### Showcase
+
+### Workshop
+
+### Appendix
