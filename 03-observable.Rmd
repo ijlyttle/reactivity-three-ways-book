@@ -25,6 +25,12 @@ Knowing how to "do stuff" and "think about stuff" using tidyverse makes it easie
 
 ### Hosted service runs in browser
 
+The best-known use for Observable is at the site for which is is named: [Observable](https://observablehq.com/).
+
+Like many hosted services, the Observable website is free to use if everything you are doing is open, i.e. the GitHub model.
+
+The Observable service uses the [Observable runtime](https://github.com/observablehq/runtime) and the [Observable standard-library](https://github.com/observablehq/stdlib); these are also available in the new [Quarto](https://quarto.org/) platform developed by RStudio.
+
 ### Reactivity baked in
 
 ### JavaScript
