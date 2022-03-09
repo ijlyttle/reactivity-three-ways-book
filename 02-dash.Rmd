@@ -302,9 +302,8 @@ The first function we'll verify is used to tell us, for a given a data frame and
 
 ```{python}
 def cols_choice (df, include):
-    col_names = df.select_dtypes(include=include).columns.to_list()
-    
-    return col_names
+
+    return df.select_dtypes(include=include).columns.to_list()
 ```
 
 Let's test the function.
@@ -335,23 +334,24 @@ def cols_header (data_records):
     if (len(data_records) == 0):
         return []
 
-    col_names = data_records[0].keys()
-    cols = list(
-      map(lambda i: {'name': i, 'id': i}, col_names)
-    )
-    
-    return cols
+    return [{'name': v, 'id': v} for v in data_records[0].keys()]
 ```
 
 There's all sorts of ways to do this in Python.
-I'm a sucker for functional programming, so I'm using a `map()` function.
+I'm a sucker for functional programming, so here's how to use a `map()` function.
 This returns a map object, so we need to change it to a list.
+
+```{python eval=FALSE}
+list(
+    map(lambda v: {'name': v, 'id': v}, data_records[0].keys())
+)
+```
 
 This works largely like R's `purrr::map()`, but in Python, we provide the function first, then the thing we are iterating over.
 Here's a purrr equivalent:
 
 ```{r eval=FALSE}
-purrr::map(col_names, ~list(name = .x, id = .x))
+purrr::map(names(data_records[1]), ~list(name = .x, id = .x))
 ```
 
 Anyhow, let's try out our Python function:
@@ -491,9 +491,7 @@ dcc.Dropdown(id='cols-group', multi=True),
 dcc.Dropdown(id='cols-agg', multi=True),
 dbc.Select(
     id='func-agg',
-    options=list(
-      map(lambda i: {'label': i, 'value': i}, agg_function_choices)
-    ),
+    options=[{'label': v, 'value': v} for v in agg_function_choices],
     value=agg_function_choices[0]
 ),
 dbc.Button(id='button-agg', children='Submit', class_name='btn btn-secondary')
@@ -508,7 +506,6 @@ Populating using a callback function makes our code more general, allowing the c
 Perhaps it wasn't necessary to follow the more-general approach here, but it allowed me to learn more about how Dash works.
 
 We define our `dbc.Select()` component completely in the layout. 
-You'll note another appearance of `list(map())` where we set the `options`.
 
 Note also that we can apply Bootstrap classes to`dbc.Button()`.
 What we might think of as a label is specified as the `children` of the button element.
