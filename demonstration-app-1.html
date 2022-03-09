@@ -24,7 +24,7 @@
 <meta name="author" content="Ian Lyttle" />
 
 
-<meta name="date" content="2022-03-06" />
+<meta name="date" content="2022-03-09" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -411,9 +411,8 @@ For Python programming, there is a great introduction at reticulate.</p>
 <p>The first function we’ll verify is used to tell us, for a given a data frame and a given Pandas type, which columns are of that type.
 (In the app, we’ll convert to records-format in the callback function.)</p>
 <div class="sourceCode" id="cb47"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb47-1"><a href="demonstration-app-1.html#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cols_choice (df, include):</span>
-<span id="cb47-2"><a href="demonstration-app-1.html#cb47-2" aria-hidden="true" tabindex="-1"></a>    col_names <span class="op">=</span> df.select_dtypes(include<span class="op">=</span>include).columns.to_list()</span>
-<span id="cb47-3"><a href="demonstration-app-1.html#cb47-3" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb47-4"><a href="demonstration-app-1.html#cb47-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> col_names</span></code></pre></div>
+<span id="cb47-2"><a href="demonstration-app-1.html#cb47-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-3"><a href="demonstration-app-1.html#cb47-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df.select_dtypes(include<span class="op">=</span>include).columns.to_list()</span></code></pre></div>
 <p>Let’s test the function.
 In Pandas, strings have type <code>'object'</code>:</p>
 <div class="sourceCode" id="cb48"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb48-1"><a href="demonstration-app-1.html#cb48-1" aria-hidden="true" tabindex="-1"></a>cols_choice(penguins, <span class="st">&#39;object&#39;</span>)</span></code></pre></div>
@@ -432,69 +431,67 @@ We use a trick by looking at only the first (well, zeroth) record.</p>
 <span id="cb52-3"><a href="demonstration-app-1.html#cb52-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="bu">len</span>(data_records) <span class="op">==</span> <span class="dv">0</span>):</span>
 <span id="cb52-4"><a href="demonstration-app-1.html#cb52-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> []</span>
 <span id="cb52-5"><a href="demonstration-app-1.html#cb52-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-6"><a href="demonstration-app-1.html#cb52-6" aria-hidden="true" tabindex="-1"></a>    col_names <span class="op">=</span> data_records[<span class="dv">0</span>].keys()</span>
-<span id="cb52-7"><a href="demonstration-app-1.html#cb52-7" aria-hidden="true" tabindex="-1"></a>    cols <span class="op">=</span> <span class="bu">list</span>(</span>
-<span id="cb52-8"><a href="demonstration-app-1.html#cb52-8" aria-hidden="true" tabindex="-1"></a>      <span class="bu">map</span>(<span class="kw">lambda</span> i: {<span class="st">&#39;name&#39;</span>: i, <span class="st">&#39;id&#39;</span>: i}, col_names)</span>
-<span id="cb52-9"><a href="demonstration-app-1.html#cb52-9" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb52-10"><a href="demonstration-app-1.html#cb52-10" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb52-11"><a href="demonstration-app-1.html#cb52-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cols</span></code></pre></div>
+<span id="cb52-6"><a href="demonstration-app-1.html#cb52-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [{<span class="st">&#39;name&#39;</span>: v, <span class="st">&#39;id&#39;</span>: v} <span class="cf">for</span> v <span class="kw">in</span> data_records[<span class="dv">0</span>].keys()]</span></code></pre></div>
 <p>There’s all sorts of ways to do this in Python.
-I’m a sucker for functional programming, so I’m using a <code>map()</code> function.
+I’m a sucker for functional programming, so here’s how to use a <code>map()</code> function.
 This returns a map object, so we need to change it to a list.</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb53-1"><a href="demonstration-app-1.html#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="bu">list</span>(</span>
+<span id="cb53-2"><a href="demonstration-app-1.html#cb53-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">map</span>(<span class="kw">lambda</span> v: {<span class="st">&#39;name&#39;</span>: v, <span class="st">&#39;id&#39;</span>: v}, data_records[<span class="dv">0</span>].keys())</span>
+<span id="cb53-3"><a href="demonstration-app-1.html#cb53-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <p>This works largely like R’s <code>purrr::map()</code>, but in Python, we provide the function first, then the thing we are iterating over.
 Here’s a purrr equivalent:</p>
-<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="demonstration-app-1.html#cb53-1" aria-hidden="true" tabindex="-1"></a>purrr<span class="sc">::</span><span class="fu">map</span>(col_names, <span class="sc">~</span><span class="fu">list</span>(<span class="at">name =</span> .x, <span class="at">id =</span> .x))</span></code></pre></div>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="demonstration-app-1.html#cb54-1" aria-hidden="true" tabindex="-1"></a>purrr<span class="sc">::</span><span class="fu">map</span>(<span class="fu">names</span>(data_records[<span class="dv">1</span>]), <span class="sc">~</span><span class="fu">list</span>(<span class="at">name =</span> .x, <span class="at">id =</span> .x))</span></code></pre></div>
 <p>Anyhow, let’s try out our Python function:</p>
-<div class="sourceCode" id="cb54"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb54-1"><a href="demonstration-app-1.html#cb54-1" aria-hidden="true" tabindex="-1"></a>cols_header(penguins_records)  </span></code></pre></div>
+<div class="sourceCode" id="cb55"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb55-1"><a href="demonstration-app-1.html#cb55-1" aria-hidden="true" tabindex="-1"></a>cols_header(penguins_records)  </span></code></pre></div>
 <pre><code>## [{&#39;name&#39;: &#39;species&#39;, &#39;id&#39;: &#39;species&#39;}, {&#39;name&#39;: &#39;island&#39;, &#39;id&#39;: &#39;island&#39;}, {&#39;name&#39;: &#39;bill_length_mm&#39;, &#39;id&#39;: &#39;bill_length_mm&#39;}, {&#39;name&#39;: &#39;bill_depth_mm&#39;, &#39;id&#39;: &#39;bill_depth_mm&#39;}, {&#39;name&#39;: &#39;flipper_length_mm&#39;, &#39;id&#39;: &#39;flipper_length_mm&#39;}, {&#39;name&#39;: &#39;body_mass_g&#39;, &#39;id&#39;: &#39;body_mass_g&#39;}, {&#39;name&#39;: &#39;sex&#39;, &#39;id&#39;: &#39;sex&#39;}, {&#39;name&#39;: &#39;year&#39;, &#39;id&#39;: &#39;year&#39;}]</code></pre>
 <p>This seems OK.</p>
 <p>Finally, we need an aggregation function.
 We send a data frame, then some lists of column-names, and a string naming an aggregation-function.
 This is an exercise in Pandas - I think this works, but my lack of experience in Pandas suggests there may be a “better” way.
 We’ll write this as in terms of data frames; we’ll convert to/from records-format in the callback function.</p>
-<div class="sourceCode" id="cb56"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb56-1"><a href="demonstration-app-1.html#cb56-1" aria-hidden="true" tabindex="-1"></a>agg_function_choices <span class="op">=</span> [<span class="st">&#39;mean&#39;</span>, <span class="st">&#39;min&#39;</span>, <span class="st">&#39;max&#39;</span>]</span>
-<span id="cb56-2"><a href="demonstration-app-1.html#cb56-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-3"><a href="demonstration-app-1.html#cb56-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> aggregate_df (df, cols_group, cols_agg, func_agg,</span>
-<span id="cb56-4"><a href="demonstration-app-1.html#cb56-4" aria-hidden="true" tabindex="-1"></a>                  str_fn_choices <span class="op">=</span> agg_function_choices):</span>
-<span id="cb56-5"><a href="demonstration-app-1.html#cb56-5" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb56-6"><a href="demonstration-app-1.html#cb56-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> func_agg <span class="kw">in</span> str_fn_choices:</span>
-<span id="cb56-7"><a href="demonstration-app-1.html#cb56-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">AssertionError</span>(<span class="ss">f&quot;</span><span class="sc">{</span>func_agg<span class="sc">}</span><span class="ss"> not a legal function-choice&quot;</span>)</span>
-<span id="cb56-8"><a href="demonstration-app-1.html#cb56-8" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb56-9"><a href="demonstration-app-1.html#cb56-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (cols_group <span class="op">!=</span> <span class="va">None</span>):</span>
-<span id="cb56-10"><a href="demonstration-app-1.html#cb56-10" aria-hidden="true" tabindex="-1"></a>        df <span class="op">=</span> df.groupby(cols_group)</span>
-<span id="cb56-11"><a href="demonstration-app-1.html#cb56-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-12"><a href="demonstration-app-1.html#cb56-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (cols_agg <span class="op">==</span> <span class="va">None</span> <span class="kw">or</span> <span class="bu">len</span>(cols_agg) <span class="op">==</span> <span class="dv">0</span>):</span>
-<span id="cb56-13"><a href="demonstration-app-1.html#cb56-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> []</span>
-<span id="cb56-14"><a href="demonstration-app-1.html#cb56-14" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb56-15"><a href="demonstration-app-1.html#cb56-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># dictionary, keys: column-names, values: function-name</span></span>
-<span id="cb56-16"><a href="demonstration-app-1.html#cb56-16" aria-hidden="true" tabindex="-1"></a>    dict_agg <span class="op">=</span> {i: func_agg <span class="cf">for</span> i <span class="kw">in</span> cols_agg}</span>
-<span id="cb56-17"><a href="demonstration-app-1.html#cb56-17" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb56-18"><a href="demonstration-app-1.html#cb56-18" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> df.agg(dict_agg).reset_index()</span>
-<span id="cb56-19"><a href="demonstration-app-1.html#cb56-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-20"><a href="demonstration-app-1.html#cb56-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df</span>
-<span id="cb56-21"><a href="demonstration-app-1.html#cb56-21" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb56-22"><a href="demonstration-app-1.html#cb56-22" aria-hidden="true" tabindex="-1"></a>aggregate_df(</span>
-<span id="cb56-23"><a href="demonstration-app-1.html#cb56-23" aria-hidden="true" tabindex="-1"></a>  penguins, </span>
-<span id="cb56-24"><a href="demonstration-app-1.html#cb56-24" aria-hidden="true" tabindex="-1"></a>  cols_group <span class="op">=</span> <span class="st">&quot;island&quot;</span>, </span>
-<span id="cb56-25"><a href="demonstration-app-1.html#cb56-25" aria-hidden="true" tabindex="-1"></a>  cols_agg <span class="op">=</span> [<span class="st">&quot;bill_length_mm&quot;</span>, <span class="st">&quot;bill_depth_mm&quot;</span>],</span>
-<span id="cb56-26"><a href="demonstration-app-1.html#cb56-26" aria-hidden="true" tabindex="-1"></a>  func_agg <span class="op">=</span> <span class="st">&quot;mean&quot;</span></span>
-<span id="cb56-27"><a href="demonstration-app-1.html#cb56-27" aria-hidden="true" tabindex="-1"></a>)  </span></code></pre></div>
+<div class="sourceCode" id="cb57"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb57-1"><a href="demonstration-app-1.html#cb57-1" aria-hidden="true" tabindex="-1"></a>agg_function_choices <span class="op">=</span> [<span class="st">&#39;mean&#39;</span>, <span class="st">&#39;min&#39;</span>, <span class="st">&#39;max&#39;</span>]</span>
+<span id="cb57-2"><a href="demonstration-app-1.html#cb57-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-3"><a href="demonstration-app-1.html#cb57-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> aggregate_df (df, cols_group, cols_agg, func_agg,</span>
+<span id="cb57-4"><a href="demonstration-app-1.html#cb57-4" aria-hidden="true" tabindex="-1"></a>                  str_fn_choices <span class="op">=</span> agg_function_choices):</span>
+<span id="cb57-5"><a href="demonstration-app-1.html#cb57-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb57-6"><a href="demonstration-app-1.html#cb57-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> func_agg <span class="kw">in</span> str_fn_choices:</span>
+<span id="cb57-7"><a href="demonstration-app-1.html#cb57-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">AssertionError</span>(<span class="ss">f&quot;</span><span class="sc">{</span>func_agg<span class="sc">}</span><span class="ss"> not a legal function-choice&quot;</span>)</span>
+<span id="cb57-8"><a href="demonstration-app-1.html#cb57-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb57-9"><a href="demonstration-app-1.html#cb57-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (cols_group <span class="op">!=</span> <span class="va">None</span>):</span>
+<span id="cb57-10"><a href="demonstration-app-1.html#cb57-10" aria-hidden="true" tabindex="-1"></a>        df <span class="op">=</span> df.groupby(cols_group)</span>
+<span id="cb57-11"><a href="demonstration-app-1.html#cb57-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-12"><a href="demonstration-app-1.html#cb57-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (cols_agg <span class="op">==</span> <span class="va">None</span> <span class="kw">or</span> <span class="bu">len</span>(cols_agg) <span class="op">==</span> <span class="dv">0</span>):</span>
+<span id="cb57-13"><a href="demonstration-app-1.html#cb57-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> []</span>
+<span id="cb57-14"><a href="demonstration-app-1.html#cb57-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb57-15"><a href="demonstration-app-1.html#cb57-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># dictionary, keys: column-names, values: function-name</span></span>
+<span id="cb57-16"><a href="demonstration-app-1.html#cb57-16" aria-hidden="true" tabindex="-1"></a>    dict_agg <span class="op">=</span> {i: func_agg <span class="cf">for</span> i <span class="kw">in</span> cols_agg}</span>
+<span id="cb57-17"><a href="demonstration-app-1.html#cb57-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb57-18"><a href="demonstration-app-1.html#cb57-18" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> df.agg(dict_agg).reset_index()</span>
+<span id="cb57-19"><a href="demonstration-app-1.html#cb57-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-20"><a href="demonstration-app-1.html#cb57-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df</span>
+<span id="cb57-21"><a href="demonstration-app-1.html#cb57-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb57-22"><a href="demonstration-app-1.html#cb57-22" aria-hidden="true" tabindex="-1"></a>aggregate_df(</span>
+<span id="cb57-23"><a href="demonstration-app-1.html#cb57-23" aria-hidden="true" tabindex="-1"></a>  penguins, </span>
+<span id="cb57-24"><a href="demonstration-app-1.html#cb57-24" aria-hidden="true" tabindex="-1"></a>  cols_group <span class="op">=</span> <span class="st">&quot;island&quot;</span>, </span>
+<span id="cb57-25"><a href="demonstration-app-1.html#cb57-25" aria-hidden="true" tabindex="-1"></a>  cols_agg <span class="op">=</span> [<span class="st">&quot;bill_length_mm&quot;</span>, <span class="st">&quot;bill_depth_mm&quot;</span>],</span>
+<span id="cb57-26"><a href="demonstration-app-1.html#cb57-26" aria-hidden="true" tabindex="-1"></a>  func_agg <span class="op">=</span> <span class="st">&quot;mean&quot;</span></span>
+<span id="cb57-27"><a href="demonstration-app-1.html#cb57-27" aria-hidden="true" tabindex="-1"></a>)  </span></code></pre></div>
 <pre><code>##       island  bill_length_mm  bill_depth_mm
 ## 0     Biscoe       45.257485      15.874850
 ## 1      Dream       44.167742      18.344355
 ## 2  Torgersen       38.950980      18.429412</code></pre>
 <p>This may be interesting only to me, but there is a more “functional” way to write the statement:</p>
-<div class="sourceCode" id="cb58"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb58-1"><a href="demonstration-app-1.html#cb58-1" aria-hidden="true" tabindex="-1"></a>dict_agg <span class="op">=</span> {i: func_agg <span class="cf">for</span> i <span class="kw">in</span> cols_agg}</span></code></pre></div>
+<div class="sourceCode" id="cb59"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb59-1"><a href="demonstration-app-1.html#cb59-1" aria-hidden="true" tabindex="-1"></a>dict_agg <span class="op">=</span> {i: func_agg <span class="cf">for</span> i <span class="kw">in</span> cols_agg}</span></code></pre></div>
 <p>Using a reducer:</p>
-<div class="sourceCode" id="cb59"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb59-1"><a href="demonstration-app-1.html#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> functools <span class="im">import</span> <span class="bu">reduce</span></span>
-<span id="cb59-2"><a href="demonstration-app-1.html#cb59-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb59-3"><a href="demonstration-app-1.html#cb59-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build (acc, val):</span>
-<span id="cb59-4"><a href="demonstration-app-1.html#cb59-4" aria-hidden="true" tabindex="-1"></a>  new_dict <span class="op">=</span> <span class="bu">dict</span>(acc)</span>
-<span id="cb59-5"><a href="demonstration-app-1.html#cb59-5" aria-hidden="true" tabindex="-1"></a>  new_dict[val] <span class="op">=</span> func_agg</span>
-<span id="cb59-6"><a href="demonstration-app-1.html#cb59-6" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb59-7"><a href="demonstration-app-1.html#cb59-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> new_dict</span>
-<span id="cb59-8"><a href="demonstration-app-1.html#cb59-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb59-9"><a href="demonstration-app-1.html#cb59-9" aria-hidden="true" tabindex="-1"></a>dict_agg <span class="op">=</span> <span class="bu">reduce</span>(build, cols_agg, {})</span></code></pre></div>
+<div class="sourceCode" id="cb60"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb60-1"><a href="demonstration-app-1.html#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> functools <span class="im">import</span> <span class="bu">reduce</span></span>
+<span id="cb60-2"><a href="demonstration-app-1.html#cb60-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-3"><a href="demonstration-app-1.html#cb60-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build (acc, val):</span>
+<span id="cb60-4"><a href="demonstration-app-1.html#cb60-4" aria-hidden="true" tabindex="-1"></a>  new_dict <span class="op">=</span> <span class="bu">dict</span>(acc)</span>
+<span id="cb60-5"><a href="demonstration-app-1.html#cb60-5" aria-hidden="true" tabindex="-1"></a>  new_dict[val] <span class="op">=</span> func_agg</span>
+<span id="cb60-6"><a href="demonstration-app-1.html#cb60-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb60-7"><a href="demonstration-app-1.html#cb60-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> new_dict</span>
+<span id="cb60-8"><a href="demonstration-app-1.html#cb60-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-9"><a href="demonstration-app-1.html#cb60-9" aria-hidden="true" tabindex="-1"></a>dict_agg <span class="op">=</span> <span class="bu">reduce</span>(build, cols_agg, {})</span></code></pre></div>
 <p>In this situation, it’s more verbose and, I think, less clear what is going on unless you are into functional programming.
 Please pardon this diversion.</p>
 <p>Confident that the “guts” of the app works, we move onto the components and the callbacks.</p>
@@ -506,44 +503,44 @@ In the app, we need to create an <code>app.layout</code>, which will be the HTML
 Just like with Shiny, we’re using Bootstrap, but we have to be a little more explicit.
 In Shiny, Bootstrap is “baked in”; in Dash, it’s an add-on.</p>
 <p>Here’s the “formatting” bits of the layout; the <code>...</code> represent Dash components that we’ll discuss presently:</p>
-<div class="sourceCode" id="cb60"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb60-1"><a href="demonstration-app-1.html#cb60-1" aria-hidden="true" tabindex="-1"></a>app.layout <span class="op">=</span> html.Div(</span>
-<span id="cb60-2"><a href="demonstration-app-1.html#cb60-2" aria-hidden="true" tabindex="-1"></a>    className<span class="op">=</span><span class="st">&#39;container-fluid&#39;</span>,</span>
-<span id="cb60-3"><a href="demonstration-app-1.html#cb60-3" aria-hidden="true" tabindex="-1"></a>    children<span class="op">=</span>[</span>
-<span id="cb60-4"><a href="demonstration-app-1.html#cb60-4" aria-hidden="true" tabindex="-1"></a>        ...</span>
-<span id="cb60-5"><a href="demonstration-app-1.html#cb60-5" aria-hidden="true" tabindex="-1"></a>        html.H2(<span class="st">&#39;Aggregator&#39;</span>),</span>
-<span id="cb60-6"><a href="demonstration-app-1.html#cb60-6" aria-hidden="true" tabindex="-1"></a>        html.Div(</span>
-<span id="cb60-7"><a href="demonstration-app-1.html#cb60-7" aria-hidden="true" tabindex="-1"></a>            className<span class="op">=</span><span class="st">&#39;row&#39;</span>,</span>
-<span id="cb60-8"><a href="demonstration-app-1.html#cb60-8" aria-hidden="true" tabindex="-1"></a>            children <span class="op">=</span>[</span>
-<span id="cb60-9"><a href="demonstration-app-1.html#cb60-9" aria-hidden="true" tabindex="-1"></a>                html.Div(</span>
-<span id="cb60-10"><a href="demonstration-app-1.html#cb60-10" aria-hidden="true" tabindex="-1"></a>                    className<span class="op">=</span><span class="st">&#39;col-sm-4&#39;</span>,</span>
-<span id="cb60-11"><a href="demonstration-app-1.html#cb60-11" aria-hidden="true" tabindex="-1"></a>                    children<span class="op">=</span>[</span>
-<span id="cb60-12"><a href="demonstration-app-1.html#cb60-12" aria-hidden="true" tabindex="-1"></a>                        dbc.Card([</span>
-<span id="cb60-13"><a href="demonstration-app-1.html#cb60-13" aria-hidden="true" tabindex="-1"></a>                            dbc.CardHeader(<span class="st">&#39;Aggregation&#39;</span>),</span>
-<span id="cb60-14"><a href="demonstration-app-1.html#cb60-14" aria-hidden="true" tabindex="-1"></a>                            dbc.CardBody([</span>
-<span id="cb60-15"><a href="demonstration-app-1.html#cb60-15" aria-hidden="true" tabindex="-1"></a>                              ...</span>
-<span id="cb60-16"><a href="demonstration-app-1.html#cb60-16" aria-hidden="true" tabindex="-1"></a>                            ])</span>
-<span id="cb60-17"><a href="demonstration-app-1.html#cb60-17" aria-hidden="true" tabindex="-1"></a>                        ])</span>
-<span id="cb60-18"><a href="demonstration-app-1.html#cb60-18" aria-hidden="true" tabindex="-1"></a>                    ]</span>
-<span id="cb60-19"><a href="demonstration-app-1.html#cb60-19" aria-hidden="true" tabindex="-1"></a>                ),</span>
-<span id="cb60-20"><a href="demonstration-app-1.html#cb60-20" aria-hidden="true" tabindex="-1"></a>                html.Div(</span>
-<span id="cb60-21"><a href="demonstration-app-1.html#cb60-21" aria-hidden="true" tabindex="-1"></a>                    className<span class="op">=</span><span class="st">&#39;col-sm-8&#39;</span>,</span>
-<span id="cb60-22"><a href="demonstration-app-1.html#cb60-22" aria-hidden="true" tabindex="-1"></a>                    children<span class="op">=</span>[</span>
-<span id="cb60-23"><a href="demonstration-app-1.html#cb60-23" aria-hidden="true" tabindex="-1"></a>                        html.H3(<span class="st">&#39;Input data&#39;</span>),</span>
-<span id="cb60-24"><a href="demonstration-app-1.html#cb60-24" aria-hidden="true" tabindex="-1"></a>                        ...</span>
-<span id="cb60-25"><a href="demonstration-app-1.html#cb60-25" aria-hidden="true" tabindex="-1"></a>                        html.Hr(),</span>
-<span id="cb60-26"><a href="demonstration-app-1.html#cb60-26" aria-hidden="true" tabindex="-1"></a>                        html.H3(<span class="st">&#39;Aggregated data&#39;</span>),</span>
-<span id="cb60-27"><a href="demonstration-app-1.html#cb60-27" aria-hidden="true" tabindex="-1"></a>                        ...</span>
-<span id="cb60-28"><a href="demonstration-app-1.html#cb60-28" aria-hidden="true" tabindex="-1"></a>                    ]</span>
-<span id="cb60-29"><a href="demonstration-app-1.html#cb60-29" aria-hidden="true" tabindex="-1"></a>                )</span>
-<span id="cb60-30"><a href="demonstration-app-1.html#cb60-30" aria-hidden="true" tabindex="-1"></a>            ]</span>
-<span id="cb60-31"><a href="demonstration-app-1.html#cb60-31" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb60-32"><a href="demonstration-app-1.html#cb60-32" aria-hidden="true" tabindex="-1"></a>    ]</span>
-<span id="cb60-33"><a href="demonstration-app-1.html#cb60-33" aria-hidden="true" tabindex="-1"></a>) </span></code></pre></div>
+<div class="sourceCode" id="cb61"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb61-1"><a href="demonstration-app-1.html#cb61-1" aria-hidden="true" tabindex="-1"></a>app.layout <span class="op">=</span> html.Div(</span>
+<span id="cb61-2"><a href="demonstration-app-1.html#cb61-2" aria-hidden="true" tabindex="-1"></a>    className<span class="op">=</span><span class="st">&#39;container-fluid&#39;</span>,</span>
+<span id="cb61-3"><a href="demonstration-app-1.html#cb61-3" aria-hidden="true" tabindex="-1"></a>    children<span class="op">=</span>[</span>
+<span id="cb61-4"><a href="demonstration-app-1.html#cb61-4" aria-hidden="true" tabindex="-1"></a>        ...</span>
+<span id="cb61-5"><a href="demonstration-app-1.html#cb61-5" aria-hidden="true" tabindex="-1"></a>        html.H2(<span class="st">&#39;Aggregator&#39;</span>),</span>
+<span id="cb61-6"><a href="demonstration-app-1.html#cb61-6" aria-hidden="true" tabindex="-1"></a>        html.Div(</span>
+<span id="cb61-7"><a href="demonstration-app-1.html#cb61-7" aria-hidden="true" tabindex="-1"></a>            className<span class="op">=</span><span class="st">&#39;row&#39;</span>,</span>
+<span id="cb61-8"><a href="demonstration-app-1.html#cb61-8" aria-hidden="true" tabindex="-1"></a>            children <span class="op">=</span>[</span>
+<span id="cb61-9"><a href="demonstration-app-1.html#cb61-9" aria-hidden="true" tabindex="-1"></a>                html.Div(</span>
+<span id="cb61-10"><a href="demonstration-app-1.html#cb61-10" aria-hidden="true" tabindex="-1"></a>                    className<span class="op">=</span><span class="st">&#39;col-sm-4&#39;</span>,</span>
+<span id="cb61-11"><a href="demonstration-app-1.html#cb61-11" aria-hidden="true" tabindex="-1"></a>                    children<span class="op">=</span>[</span>
+<span id="cb61-12"><a href="demonstration-app-1.html#cb61-12" aria-hidden="true" tabindex="-1"></a>                        dbc.Card([</span>
+<span id="cb61-13"><a href="demonstration-app-1.html#cb61-13" aria-hidden="true" tabindex="-1"></a>                            dbc.CardHeader(<span class="st">&#39;Aggregation&#39;</span>),</span>
+<span id="cb61-14"><a href="demonstration-app-1.html#cb61-14" aria-hidden="true" tabindex="-1"></a>                            dbc.CardBody([</span>
+<span id="cb61-15"><a href="demonstration-app-1.html#cb61-15" aria-hidden="true" tabindex="-1"></a>                              ...</span>
+<span id="cb61-16"><a href="demonstration-app-1.html#cb61-16" aria-hidden="true" tabindex="-1"></a>                            ])</span>
+<span id="cb61-17"><a href="demonstration-app-1.html#cb61-17" aria-hidden="true" tabindex="-1"></a>                        ])</span>
+<span id="cb61-18"><a href="demonstration-app-1.html#cb61-18" aria-hidden="true" tabindex="-1"></a>                    ]</span>
+<span id="cb61-19"><a href="demonstration-app-1.html#cb61-19" aria-hidden="true" tabindex="-1"></a>                ),</span>
+<span id="cb61-20"><a href="demonstration-app-1.html#cb61-20" aria-hidden="true" tabindex="-1"></a>                html.Div(</span>
+<span id="cb61-21"><a href="demonstration-app-1.html#cb61-21" aria-hidden="true" tabindex="-1"></a>                    className<span class="op">=</span><span class="st">&#39;col-sm-8&#39;</span>,</span>
+<span id="cb61-22"><a href="demonstration-app-1.html#cb61-22" aria-hidden="true" tabindex="-1"></a>                    children<span class="op">=</span>[</span>
+<span id="cb61-23"><a href="demonstration-app-1.html#cb61-23" aria-hidden="true" tabindex="-1"></a>                        html.H3(<span class="st">&#39;Input data&#39;</span>),</span>
+<span id="cb61-24"><a href="demonstration-app-1.html#cb61-24" aria-hidden="true" tabindex="-1"></a>                        ...</span>
+<span id="cb61-25"><a href="demonstration-app-1.html#cb61-25" aria-hidden="true" tabindex="-1"></a>                        html.Hr(),</span>
+<span id="cb61-26"><a href="demonstration-app-1.html#cb61-26" aria-hidden="true" tabindex="-1"></a>                        html.H3(<span class="st">&#39;Aggregated data&#39;</span>),</span>
+<span id="cb61-27"><a href="demonstration-app-1.html#cb61-27" aria-hidden="true" tabindex="-1"></a>                        ...</span>
+<span id="cb61-28"><a href="demonstration-app-1.html#cb61-28" aria-hidden="true" tabindex="-1"></a>                    ]</span>
+<span id="cb61-29"><a href="demonstration-app-1.html#cb61-29" aria-hidden="true" tabindex="-1"></a>                )</span>
+<span id="cb61-30"><a href="demonstration-app-1.html#cb61-30" aria-hidden="true" tabindex="-1"></a>            ]</span>
+<span id="cb61-31"><a href="demonstration-app-1.html#cb61-31" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb61-32"><a href="demonstration-app-1.html#cb61-32" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb61-33"><a href="demonstration-app-1.html#cb61-33" aria-hidden="true" tabindex="-1"></a>) </span></code></pre></div>
 <div id="data-stores" class="section level4" number="2.2.4.1">
 <h4><span class="header-section-number">2.2.4.1</span> Data stores</h4>
 <p>The first parts I want to highlight are the data stores:</p>
-<div class="sourceCode" id="cb61"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb61-1"><a href="demonstration-app-1.html#cb61-1" aria-hidden="true" tabindex="-1"></a>dcc.Store(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;inp&#39;</span>, data<span class="op">=</span>penguins.to_dict(<span class="st">&#39;records&#39;</span>)),</span>
-<span id="cb61-2"><a href="demonstration-app-1.html#cb61-2" aria-hidden="true" tabindex="-1"></a>dcc.Store(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;agg&#39;</span>, data<span class="op">=</span>[])</span></code></pre></div>
+<div class="sourceCode" id="cb62"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb62-1"><a href="demonstration-app-1.html#cb62-1" aria-hidden="true" tabindex="-1"></a>dcc.Store(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;inp&#39;</span>, data<span class="op">=</span>penguins.to_dict(<span class="st">&#39;records&#39;</span>)),</span>
+<span id="cb62-2"><a href="demonstration-app-1.html#cb62-2" aria-hidden="true" tabindex="-1"></a>dcc.Store(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;agg&#39;</span>, data<span class="op">=</span>[])</span></code></pre></div>
 <p>Recall that the server part of a Dash app cannot store its state.
 Instead, we will store the state, in our case: the input and aggregated data, in the DOM.
 Dash provides a <code>dcc.Store()</code> component; in its <code>data</code> property, we store the records-based data (note the use of <code>.to_dict('records')</code>.
@@ -552,24 +549,21 @@ Also note that, just like Shiny, components each have an <code>id</code> propert
 <div id="inputs-1" class="section level4" number="2.2.4.2">
 <h4><span class="header-section-number">2.2.4.2</span> Inputs</h4>
 <p>Let’s look at the components that specify the aggregation:</p>
-<div class="sourceCode" id="cb62"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb62-1"><a href="demonstration-app-1.html#cb62-1" aria-hidden="true" tabindex="-1"></a>dcc.Dropdown(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;cols-group&#39;</span>, multi<span class="op">=</span><span class="va">True</span>),</span>
-<span id="cb62-2"><a href="demonstration-app-1.html#cb62-2" aria-hidden="true" tabindex="-1"></a>dcc.Dropdown(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;cols-agg&#39;</span>, multi<span class="op">=</span><span class="va">True</span>),</span>
-<span id="cb62-3"><a href="demonstration-app-1.html#cb62-3" aria-hidden="true" tabindex="-1"></a>dbc.Select(</span>
-<span id="cb62-4"><a href="demonstration-app-1.html#cb62-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">id</span><span class="op">=</span><span class="st">&#39;func-agg&#39;</span>,</span>
-<span id="cb62-5"><a href="demonstration-app-1.html#cb62-5" aria-hidden="true" tabindex="-1"></a>    options<span class="op">=</span><span class="bu">list</span>(</span>
-<span id="cb62-6"><a href="demonstration-app-1.html#cb62-6" aria-hidden="true" tabindex="-1"></a>      <span class="bu">map</span>(<span class="kw">lambda</span> i: {<span class="st">&#39;label&#39;</span>: i, <span class="st">&#39;value&#39;</span>: i}, agg_function_choices)</span>
-<span id="cb62-7"><a href="demonstration-app-1.html#cb62-7" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb62-8"><a href="demonstration-app-1.html#cb62-8" aria-hidden="true" tabindex="-1"></a>    value<span class="op">=</span>agg_function_choices[<span class="dv">0</span>]</span>
-<span id="cb62-9"><a href="demonstration-app-1.html#cb62-9" aria-hidden="true" tabindex="-1"></a>),</span>
-<span id="cb62-10"><a href="demonstration-app-1.html#cb62-10" aria-hidden="true" tabindex="-1"></a>dbc.Button(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;button-agg&#39;</span>, children<span class="op">=</span><span class="st">&#39;Submit&#39;</span>, class_name<span class="op">=</span><span class="st">&#39;btn btn-secondary&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb63"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb63-1"><a href="demonstration-app-1.html#cb63-1" aria-hidden="true" tabindex="-1"></a>dcc.Dropdown(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;cols-group&#39;</span>, multi<span class="op">=</span><span class="va">True</span>),</span>
+<span id="cb63-2"><a href="demonstration-app-1.html#cb63-2" aria-hidden="true" tabindex="-1"></a>dcc.Dropdown(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;cols-agg&#39;</span>, multi<span class="op">=</span><span class="va">True</span>),</span>
+<span id="cb63-3"><a href="demonstration-app-1.html#cb63-3" aria-hidden="true" tabindex="-1"></a>dbc.Select(</span>
+<span id="cb63-4"><a href="demonstration-app-1.html#cb63-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">id</span><span class="op">=</span><span class="st">&#39;func-agg&#39;</span>,</span>
+<span id="cb63-5"><a href="demonstration-app-1.html#cb63-5" aria-hidden="true" tabindex="-1"></a>    options<span class="op">=</span>[{<span class="st">&#39;label&#39;</span>: v, <span class="st">&#39;value&#39;</span>: v} <span class="cf">for</span> v <span class="kw">in</span> agg_function_choices],</span>
+<span id="cb63-6"><a href="demonstration-app-1.html#cb63-6" aria-hidden="true" tabindex="-1"></a>    value<span class="op">=</span>agg_function_choices[<span class="dv">0</span>]</span>
+<span id="cb63-7"><a href="demonstration-app-1.html#cb63-7" aria-hidden="true" tabindex="-1"></a>),</span>
+<span id="cb63-8"><a href="demonstration-app-1.html#cb63-8" aria-hidden="true" tabindex="-1"></a>dbc.Button(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;button-agg&#39;</span>, children<span class="op">=</span><span class="st">&#39;Submit&#39;</span>, class_name<span class="op">=</span><span class="st">&#39;btn btn-secondary&#39;</span>)</span></code></pre></div>
 <p>Here, we’re using a couple of “standard” (<code>dcc</code>) dropdowns and a couple of Bootstrap (<code>dbc</code>) components.</p>
 <p>With the dropdowns, other than providing the <code>id</code>, we specify that multiple selections can be made.
 We don’t populate the options; we’ll do this using a callback.
 If we were only ever going to use one input-dataset, in this case <code>penguins</code>, it might make sense to populate the <code>options</code> when defining the component.
 Populating using a callback function makes our code more general, allowing the case where we could upload an abitrary dataset.
 Perhaps it wasn’t necessary to follow the more-general approach here, but it allowed me to learn more about how Dash works.</p>
-<p>We define our <code>dbc.Select()</code> component completely in the layout.
-You’ll note another appearance of <code>list(map())</code> where we set the <code>options</code>.</p>
+<p>We define our <code>dbc.Select()</code> component completely in the layout.</p>
 <p>Note also that we can apply Bootstrap classes to<code>dbc.Button()</code>.
 What we might think of as a label is specified as the <code>children</code> of the button element.</p>
 </div>
@@ -577,11 +571,11 @@ What we might think of as a label is specified as the <code>children</code> of t
 <h4><span class="header-section-number">2.2.4.3</span> Outputs</h4>
 <p>It remains to look at the data tables.
 There are two tables, identical in form; we will examine only one of them:</p>
-<div class="sourceCode" id="cb63"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb63-1"><a href="demonstration-app-1.html#cb63-1" aria-hidden="true" tabindex="-1"></a>dash_table.DataTable(</span>
-<span id="cb63-2"><a href="demonstration-app-1.html#cb63-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">id</span><span class="op">=</span><span class="st">&#39;table-inp&#39;</span>,</span>
-<span id="cb63-3"><a href="demonstration-app-1.html#cb63-3" aria-hidden="true" tabindex="-1"></a>    page_size<span class="op">=</span><span class="dv">10</span>,</span>
-<span id="cb63-4"><a href="demonstration-app-1.html#cb63-4" aria-hidden="true" tabindex="-1"></a>    sort_action<span class="op">=</span><span class="st">&#39;native&#39;</span></span>
-<span id="cb63-5"><a href="demonstration-app-1.html#cb63-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb64"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb64-1"><a href="demonstration-app-1.html#cb64-1" aria-hidden="true" tabindex="-1"></a>dash_table.DataTable(</span>
+<span id="cb64-2"><a href="demonstration-app-1.html#cb64-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">id</span><span class="op">=</span><span class="st">&#39;table-inp&#39;</span>,</span>
+<span id="cb64-3"><a href="demonstration-app-1.html#cb64-3" aria-hidden="true" tabindex="-1"></a>    page_size<span class="op">=</span><span class="dv">10</span>,</span>
+<span id="cb64-4"><a href="demonstration-app-1.html#cb64-4" aria-hidden="true" tabindex="-1"></a>    sort_action<span class="op">=</span><span class="st">&#39;native&#39;</span></span>
+<span id="cb64-5"><a href="demonstration-app-1.html#cb64-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <p>The properties here are straightforward: we need an <code>id</code>, we want to show ten entries at a time, <code>sort_action='native'</code> indicates that we want sorting to be available (and for Dash to take care of it).</p>
 <p>We will populate the data tables using callback functions.</p>
 </div>
@@ -590,12 +584,12 @@ There are two tables, identical in form; we will examine only one of them:</p>
 <h3><span class="header-section-number">2.2.5</span> Callback functions</h3>
 <p>In Dash, callback functions are just regular functions with decorators.
 Here’s a very generic example:</p>
-<div class="sourceCode" id="cb64"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb64-1"><a href="demonstration-app-1.html#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.callback</span>(Output(<span class="st">&#39;output-component&#39;</span>, <span class="st">&#39;output-property&#39;</span>),</span>
-<span id="cb64-2"><a href="demonstration-app-1.html#cb64-2" aria-hidden="true" tabindex="-1"></a>              Input(<span class="st">&#39;input-component&#39;</span>, <span class="st">&#39;input-property&#39;</span>))</span>
-<span id="cb64-3"><a href="demonstration-app-1.html#cb64-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> some_function_name(x):</span>
-<span id="cb64-4"><a href="demonstration-app-1.html#cb64-4" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> some_function(x)</span>
-<span id="cb64-5"><a href="demonstration-app-1.html#cb64-5" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb64-6"><a href="demonstration-app-1.html#cb64-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> y</span></code></pre></div>
+<div class="sourceCode" id="cb65"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb65-1"><a href="demonstration-app-1.html#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.callback</span>(Output(<span class="st">&#39;output-component&#39;</span>, <span class="st">&#39;output-property&#39;</span>),</span>
+<span id="cb65-2"><a href="demonstration-app-1.html#cb65-2" aria-hidden="true" tabindex="-1"></a>              Input(<span class="st">&#39;input-component&#39;</span>, <span class="st">&#39;input-property&#39;</span>))</span>
+<span id="cb65-3"><a href="demonstration-app-1.html#cb65-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> some_function_name(x):</span>
+<span id="cb65-4"><a href="demonstration-app-1.html#cb65-4" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> some_function(x)</span>
+<span id="cb65-5"><a href="demonstration-app-1.html#cb65-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb65-6"><a href="demonstration-app-1.html#cb65-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> y</span></code></pre></div>
 <p>The decorator tells Dash how to build a function that wraps the “actual” function.
 We are not concerned with the implementation; we are interested in the interface.</p>
 <p>The decorator is this bit of code: <code>@app.callback()</code>.
@@ -614,11 +608,11 @@ It takes a series of arguments which map to the function’s parameters and retu
 <h4><span class="header-section-number">2.2.5.1</span> Inputs</h4>
 <p>We have a couple of input components that need updating: the grouping columns and the aggregation columns.
 Each has its own callback, but they are virtually identical, so I’ll describe only one.</p>
-<div class="sourceCode" id="cb65"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb65-1"><a href="demonstration-app-1.html#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.callback</span>(Output(<span class="st">&#39;cols-group&#39;</span>, <span class="st">&#39;options&#39;</span>),</span>
-<span id="cb65-2"><a href="demonstration-app-1.html#cb65-2" aria-hidden="true" tabindex="-1"></a>              Input(<span class="st">&#39;inp&#39;</span>, <span class="st">&#39;data&#39;</span>))</span>
-<span id="cb65-3"><a href="demonstration-app-1.html#cb65-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> update_cols_group(data_records):</span>
-<span id="cb65-4"><a href="demonstration-app-1.html#cb65-4" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> pd.DataFrame.from_dict(data_records)</span>
-<span id="cb65-5"><a href="demonstration-app-1.html#cb65-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cols_choice(df, <span class="st">&#39;object&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb66"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb66-1"><a href="demonstration-app-1.html#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.callback</span>(Output(<span class="st">&#39;cols-group&#39;</span>, <span class="st">&#39;options&#39;</span>),</span>
+<span id="cb66-2"><a href="demonstration-app-1.html#cb66-2" aria-hidden="true" tabindex="-1"></a>              Input(<span class="st">&#39;inp&#39;</span>, <span class="st">&#39;data&#39;</span>))</span>
+<span id="cb66-3"><a href="demonstration-app-1.html#cb66-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> update_cols_group(data_records):</span>
+<span id="cb66-4"><a href="demonstration-app-1.html#cb66-4" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> pd.DataFrame.from_dict(data_records)</span>
+<span id="cb66-5"><a href="demonstration-app-1.html#cb66-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cols_choice(df, <span class="st">&#39;object&#39;</span>)</span></code></pre></div>
 <p>Whenever the <code>inp</code> <code>data</code> changes:</p>
 <ul>
 <li>the function is called using the input data (in records form).</li>
@@ -630,22 +624,22 @@ Each has its own callback, but they are virtually identical, so I’ll describe 
 <div id="calculations" class="section level4" number="2.2.5.2">
 <h4><span class="header-section-number">2.2.5.2</span> Calculations</h4>
 <p>The callback that performs the aggregation has more going on, but we’ll get to the bottom of it.</p>
-<div class="sourceCode" id="cb66"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb66-1"><a href="demonstration-app-1.html#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.callback</span>(Output(<span class="st">&#39;agg&#39;</span>, <span class="st">&#39;data&#39;</span>),</span>
-<span id="cb66-2"><a href="demonstration-app-1.html#cb66-2" aria-hidden="true" tabindex="-1"></a>              Input(<span class="st">&#39;button-agg&#39;</span>, <span class="st">&#39;n_clicks&#39;</span>),</span>
-<span id="cb66-3"><a href="demonstration-app-1.html#cb66-3" aria-hidden="true" tabindex="-1"></a>              State(<span class="st">&#39;inp&#39;</span>, <span class="st">&#39;data&#39;</span>),</span>
-<span id="cb66-4"><a href="demonstration-app-1.html#cb66-4" aria-hidden="true" tabindex="-1"></a>              State(<span class="st">&#39;cols-group&#39;</span>, <span class="st">&#39;value&#39;</span>),</span>
-<span id="cb66-5"><a href="demonstration-app-1.html#cb66-5" aria-hidden="true" tabindex="-1"></a>              State(<span class="st">&#39;cols-agg&#39;</span>, <span class="st">&#39;value&#39;</span>),</span>
-<span id="cb66-6"><a href="demonstration-app-1.html#cb66-6" aria-hidden="true" tabindex="-1"></a>              State(<span class="st">&#39;func-agg&#39;</span>, <span class="st">&#39;value&#39;</span>),</span>
-<span id="cb66-7"><a href="demonstration-app-1.html#cb66-7" aria-hidden="true" tabindex="-1"></a>              prevent_initial_call<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb66-8"><a href="demonstration-app-1.html#cb66-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> aggregate(n_clicks, data_records, cols_group, cols_agg, func_agg):</span>
-<span id="cb66-9"><a href="demonstration-app-1.html#cb66-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># create DataFrame</span></span>
-<span id="cb66-10"><a href="demonstration-app-1.html#cb66-10" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> pd.DataFrame.from_dict(data_records)</span>
-<span id="cb66-11"><a href="demonstration-app-1.html#cb66-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb66-12"><a href="demonstration-app-1.html#cb66-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># aggregate</span></span>
-<span id="cb66-13"><a href="demonstration-app-1.html#cb66-13" aria-hidden="true" tabindex="-1"></a>    df_new <span class="op">=</span> aggregate_df(df, cols_group, cols_agg, func_agg)</span>
-<span id="cb66-14"><a href="demonstration-app-1.html#cb66-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb66-15"><a href="demonstration-app-1.html#cb66-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># serialize DataFrame</span></span>
-<span id="cb66-16"><a href="demonstration-app-1.html#cb66-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df_new.to_dict(<span class="st">&#39;records&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb67"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb67-1"><a href="demonstration-app-1.html#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.callback</span>(Output(<span class="st">&#39;agg&#39;</span>, <span class="st">&#39;data&#39;</span>),</span>
+<span id="cb67-2"><a href="demonstration-app-1.html#cb67-2" aria-hidden="true" tabindex="-1"></a>              Input(<span class="st">&#39;button-agg&#39;</span>, <span class="st">&#39;n_clicks&#39;</span>),</span>
+<span id="cb67-3"><a href="demonstration-app-1.html#cb67-3" aria-hidden="true" tabindex="-1"></a>              State(<span class="st">&#39;inp&#39;</span>, <span class="st">&#39;data&#39;</span>),</span>
+<span id="cb67-4"><a href="demonstration-app-1.html#cb67-4" aria-hidden="true" tabindex="-1"></a>              State(<span class="st">&#39;cols-group&#39;</span>, <span class="st">&#39;value&#39;</span>),</span>
+<span id="cb67-5"><a href="demonstration-app-1.html#cb67-5" aria-hidden="true" tabindex="-1"></a>              State(<span class="st">&#39;cols-agg&#39;</span>, <span class="st">&#39;value&#39;</span>),</span>
+<span id="cb67-6"><a href="demonstration-app-1.html#cb67-6" aria-hidden="true" tabindex="-1"></a>              State(<span class="st">&#39;func-agg&#39;</span>, <span class="st">&#39;value&#39;</span>),</span>
+<span id="cb67-7"><a href="demonstration-app-1.html#cb67-7" aria-hidden="true" tabindex="-1"></a>              prevent_initial_call<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb67-8"><a href="demonstration-app-1.html#cb67-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> aggregate(n_clicks, data_records, cols_group, cols_agg, func_agg):</span>
+<span id="cb67-9"><a href="demonstration-app-1.html#cb67-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># create DataFrame</span></span>
+<span id="cb67-10"><a href="demonstration-app-1.html#cb67-10" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> pd.DataFrame.from_dict(data_records)</span>
+<span id="cb67-11"><a href="demonstration-app-1.html#cb67-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-12"><a href="demonstration-app-1.html#cb67-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># aggregate</span></span>
+<span id="cb67-13"><a href="demonstration-app-1.html#cb67-13" aria-hidden="true" tabindex="-1"></a>    df_new <span class="op">=</span> aggregate_df(df, cols_group, cols_agg, func_agg)</span>
+<span id="cb67-14"><a href="demonstration-app-1.html#cb67-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-15"><a href="demonstration-app-1.html#cb67-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># serialize DataFrame</span></span>
+<span id="cb67-16"><a href="demonstration-app-1.html#cb67-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df_new.to_dict(<span class="st">&#39;records&#39;</span>)</span></code></pre></div>
 <p>A couple of things to sort through:</p>
 <ul>
 <li><p>The function has five parameters; the decorator has one <code>Input()</code> and four instances of <code>State()</code>.</p></li>
@@ -661,11 +655,11 @@ By setting it to <code>True</code>, we ensure that the only way the aggregation 
 <h4><span class="header-section-number">2.2.5.3</span> Outputs</h4>
 <p>The final set of callbacks is for our data tables.
 Again, although we have two data tables, the callbacks are virtually identical, so I’ll highlight only one.</p>
-<div class="sourceCode" id="cb67"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb67-1"><a href="demonstration-app-1.html#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.callback</span>(Output(<span class="st">&#39;table-inp&#39;</span>, <span class="st">&#39;columns&#39;</span>),</span>
-<span id="cb67-2"><a href="demonstration-app-1.html#cb67-2" aria-hidden="true" tabindex="-1"></a>              Output(<span class="st">&#39;table-inp&#39;</span>, <span class="st">&#39;data&#39;</span>),</span>
-<span id="cb67-3"><a href="demonstration-app-1.html#cb67-3" aria-hidden="true" tabindex="-1"></a>              Input(<span class="st">&#39;inp&#39;</span>, <span class="st">&#39;data&#39;</span>))</span>
-<span id="cb67-4"><a href="demonstration-app-1.html#cb67-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> update_table_inp(data_records):</span>
-<span id="cb67-5"><a href="demonstration-app-1.html#cb67-5" aria-hidden="true" tabindex="-1"></a>     <span class="cf">return</span> cols_header(data_records), data_records  </span></code></pre></div>
+<div class="sourceCode" id="cb68"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb68-1"><a href="demonstration-app-1.html#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.callback</span>(Output(<span class="st">&#39;table-inp&#39;</span>, <span class="st">&#39;columns&#39;</span>),</span>
+<span id="cb68-2"><a href="demonstration-app-1.html#cb68-2" aria-hidden="true" tabindex="-1"></a>              Output(<span class="st">&#39;table-inp&#39;</span>, <span class="st">&#39;data&#39;</span>),</span>
+<span id="cb68-3"><a href="demonstration-app-1.html#cb68-3" aria-hidden="true" tabindex="-1"></a>              Input(<span class="st">&#39;inp&#39;</span>, <span class="st">&#39;data&#39;</span>))</span>
+<span id="cb68-4"><a href="demonstration-app-1.html#cb68-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> update_table_inp(data_records):</span>
+<span id="cb68-5"><a href="demonstration-app-1.html#cb68-5" aria-hidden="true" tabindex="-1"></a>     <span class="cf">return</span> cols_header(data_records), data_records  </span></code></pre></div>
 <p>The thing to note there is that Dash and Python support multiple return-values, mapping each to an <code>Output()</code>.</p>
 <p>This situation merits multiple return-values because a Dash data table has a properties for <code>data</code> and <code>columns</code> (headers).
 This information comes from the same source, so it made sense to use multiple return-values.</p>
