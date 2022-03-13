@@ -426,6 +426,21 @@ Then we filter this array using another predicate function:</p>
 </ul>
 <p>It can be a lot to absorb JavaScript, functional programming, and the peculiarities of arquero <em>all at once</em>.
 Keep in mind that you can apply the functional programming you learned using purrr, and your knowledge of how <code>group_by()</code> and <code>summarise()</code> work in dplyr.</p>
+<p>Here’s the equivalent in R, using purrr and rlang:</p>
+<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb77-1"><a href="demonstration-app-2.html#cb77-1" aria-hidden="true" tabindex="-1"></a>values <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">reduce</span>(</span>
+<span id="cb77-2"><a href="demonstration-app-2.html#cb77-2" aria-hidden="true" tabindex="-1"></a>  cols_agg,</span>
+<span id="cb77-3"><a href="demonstration-app-2.html#cb77-3" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span><span class="fu">c</span>(</span>
+<span id="cb77-4"><a href="demonstration-app-2.html#cb77-4" aria-hidden="true" tabindex="-1"></a>    .x, </span>
+<span id="cb77-5"><a href="demonstration-app-2.html#cb77-5" aria-hidden="true" tabindex="-1"></a>    rlang<span class="sc">::</span><span class="fu">list2</span>(</span>
+<span id="cb77-6"><a href="demonstration-app-2.html#cb77-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;{.y}&quot;</span> <span class="sc">:</span><span class="er">=</span> <span class="fu">list</span>(</span>
+<span id="cb77-7"><a href="demonstration-app-2.html#cb77-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">expr =</span> glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">&#39;(d) =&gt; op.{func_agg}(d[&quot;{.y}&quot;])&#39;</span>), </span>
+<span id="cb77-8"><a href="demonstration-app-2.html#cb77-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">func =</span> <span class="cn">TRUE</span></span>
+<span id="cb77-9"><a href="demonstration-app-2.html#cb77-9" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb77-10"><a href="demonstration-app-2.html#cb77-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb77-11"><a href="demonstration-app-2.html#cb77-11" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb77-12"><a href="demonstration-app-2.html#cb77-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">.init =</span> <span class="fu">list</span>()</span>
+<span id="cb77-13"><a href="demonstration-app-2.html#cb77-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p>This gets a little heavy because we have to use <code>rlang::list2()</code> to interpolate the names: <code>"{.y}"</code>.</p>
 <p>We don’t have the same check here to validate the aggregation function.
 Security considerations are a little bit different when using Observable.
 Because Observable runs this app entirely in the user’s browser, there is no server component.
@@ -436,34 +451,34 @@ Thus, the user is free to run whatever code they like - it’s a bit like an IDE
 <h3><span class="header-section-number">3.2.3</span> Showcase</h3>
 <p>Here’s where we show what the notebook can do.
 First, we display the <code>inp</code> table, using Observable’s built-in <code>Inputs.Table()</code>:</p>
-<div class="sourceCode" id="cb77"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb77-1"><a href="demonstration-app-2.html#cb77-1" aria-hidden="true" tabindex="-1"></a>viewof table_inp <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">table</span>(inp)</span></code></pre></div>
+<div class="sourceCode" id="cb78"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb78-1"><a href="demonstration-app-2.html#cb78-1" aria-hidden="true" tabindex="-1"></a>viewof table_inp <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">table</span>(inp)</span></code></pre></div>
 <p><code>table_inp</code> has a value (we can select rows), but we don’t use it.</p>
 <p>Next, we have an input for the grouping columns.
 We are using the <code>columnNamesPredicate()</code> function using Lodash’s <code>_.isString</code>:</p>
-<div class="sourceCode" id="cb78"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb78-1"><a href="demonstration-app-2.html#cb78-1" aria-hidden="true" tabindex="-1"></a>viewof cols_group <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">select</span>(<span class="fu">columnNamesPredicate</span>(inp<span class="op">,</span> _<span class="op">.</span><span class="at">isString</span>)<span class="op">,</span> {</span>
-<span id="cb78-2"><a href="demonstration-app-2.html#cb78-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">&quot;Grouping columns&quot;</span><span class="op">,</span></span>
-<span id="cb78-3"><a href="demonstration-app-2.html#cb78-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">multiple</span><span class="op">:</span> <span class="kw">true</span></span>
-<span id="cb78-4"><a href="demonstration-app-2.html#cb78-4" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<div class="sourceCode" id="cb79"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb79-1"><a href="demonstration-app-2.html#cb79-1" aria-hidden="true" tabindex="-1"></a>viewof cols_group <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">select</span>(<span class="fu">columnNamesPredicate</span>(inp<span class="op">,</span> _<span class="op">.</span><span class="at">isString</span>)<span class="op">,</span> {</span>
+<span id="cb79-2"><a href="demonstration-app-2.html#cb79-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">&quot;Grouping columns&quot;</span><span class="op">,</span></span>
+<span id="cb79-3"><a href="demonstration-app-2.html#cb79-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">multiple</span><span class="op">:</span> <span class="kw">true</span></span>
+<span id="cb79-4"><a href="demonstration-app-2.html#cb79-4" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
 <p>The input for <code>cols_agg</code> is almost identical; there, we use <code>_.isNumber</code> as a predicate.</p>
 <p>The input for <code>func_agg</code> is fairly straightforward:</p>
-<div class="sourceCode" id="cb79"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb79-1"><a href="demonstration-app-2.html#cb79-1" aria-hidden="true" tabindex="-1"></a>viewof func_agg <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">select</span>([<span class="st">&quot;mean&quot;</span><span class="op">,</span> <span class="st">&quot;min&quot;</span><span class="op">,</span> <span class="st">&quot;max&quot;</span>]<span class="op">,</span> {</span>
-<span id="cb79-2"><a href="demonstration-app-2.html#cb79-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">&quot;Aggregation function&quot;</span><span class="op">,</span></span>
-<span id="cb79-3"><a href="demonstration-app-2.html#cb79-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">multiple</span><span class="op">:</span> <span class="kw">false</span></span>
-<span id="cb79-4"><a href="demonstration-app-2.html#cb79-4" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<div class="sourceCode" id="cb80"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb80-1"><a href="demonstration-app-2.html#cb80-1" aria-hidden="true" tabindex="-1"></a>viewof func_agg <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">select</span>([<span class="st">&quot;mean&quot;</span><span class="op">,</span> <span class="st">&quot;min&quot;</span><span class="op">,</span> <span class="st">&quot;max&quot;</span>]<span class="op">,</span> {</span>
+<span id="cb80-2"><a href="demonstration-app-2.html#cb80-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">&quot;Aggregation function&quot;</span><span class="op">,</span></span>
+<span id="cb80-3"><a href="demonstration-app-2.html#cb80-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">multiple</span><span class="op">:</span> <span class="kw">false</span></span>
+<span id="cb80-4"><a href="demonstration-app-2.html#cb80-4" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
 <p>For each of these inputs: <code>cols_group</code>, <code>cols_agg</code>, and <code>func_agg</code>, the value is the selection.</p>
 <p>The button is less straightforward; we view is the button, but the value is the aggregated table.
 The two are joined by a <code>reduce</code> option, a function that is run whenever the button is clicked.</p>
 <p>In our case, the reduce function runs the query on the <code>inp</code> table, and returns the aggregated table.</p>
-<div class="sourceCode" id="cb80"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb80-1"><a href="demonstration-app-2.html#cb80-1" aria-hidden="true" tabindex="-1"></a>viewof agg <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">button</span>(<span class="st">&quot;Submit&quot;</span><span class="op">,</span> {</span>
-<span id="cb80-2"><a href="demonstration-app-2.html#cb80-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">value</span><span class="op">:</span> aq<span class="op">.</span><span class="fu">table</span>()<span class="op">,</span></span>
-<span id="cb80-3"><a href="demonstration-app-2.html#cb80-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">reduce</span><span class="op">:</span> () <span class="kw">=&gt;</span> {</span>
-<span id="cb80-4"><a href="demonstration-app-2.html#cb80-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> aq</span>
-<span id="cb80-5"><a href="demonstration-app-2.html#cb80-5" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">queryFrom</span>(<span class="fu">buildQueryObject</span>(cols_group<span class="op">,</span> cols_agg<span class="op">,</span> func_agg))</span>
-<span id="cb80-6"><a href="demonstration-app-2.html#cb80-6" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">evaluate</span>(inp)<span class="op">;</span></span>
-<span id="cb80-7"><a href="demonstration-app-2.html#cb80-7" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb80-8"><a href="demonstration-app-2.html#cb80-8" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<div class="sourceCode" id="cb81"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb81-1"><a href="demonstration-app-2.html#cb81-1" aria-hidden="true" tabindex="-1"></a>viewof agg <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">button</span>(<span class="st">&quot;Submit&quot;</span><span class="op">,</span> {</span>
+<span id="cb81-2"><a href="demonstration-app-2.html#cb81-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">value</span><span class="op">:</span> aq<span class="op">.</span><span class="fu">table</span>()<span class="op">,</span></span>
+<span id="cb81-3"><a href="demonstration-app-2.html#cb81-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">reduce</span><span class="op">:</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb81-4"><a href="demonstration-app-2.html#cb81-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> aq</span>
+<span id="cb81-5"><a href="demonstration-app-2.html#cb81-5" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">queryFrom</span>(<span class="fu">buildQueryObject</span>(cols_group<span class="op">,</span> cols_agg<span class="op">,</span> func_agg))</span>
+<span id="cb81-6"><a href="demonstration-app-2.html#cb81-6" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">evaluate</span>(inp)<span class="op">;</span></span>
+<span id="cb81-7"><a href="demonstration-app-2.html#cb81-7" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb81-8"><a href="demonstration-app-2.html#cb81-8" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
 <p>Finally, we display the <code>agg</code> table:</p>
-<div class="sourceCode" id="cb81"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb81-1"><a href="demonstration-app-2.html#cb81-1" aria-hidden="true" tabindex="-1"></a>viewof table_agg <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">table</span>(agg)</span></code></pre></div>
+<div class="sourceCode" id="cb82"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb82-1"><a href="demonstration-app-2.html#cb82-1" aria-hidden="true" tabindex="-1"></a>viewof table_agg <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">table</span>(agg)</span></code></pre></div>
 
 </div>
 </div>
