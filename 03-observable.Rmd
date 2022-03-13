@@ -114,16 +114,155 @@ The *view* is a side-effect; the *value* is, well, a value.
 
 ## Demonstration app
 
+Here's the link to the now-familar [aggregator app](https://observablehq.com/@ijlyttle/aggregate-local).
+
+In Observable, there is not a clear distiction between an input and an output. 
+I find it helpful to think of *everything* in Observable as a reactive varriable.
+
 ```{r echo=FALSE, fig.cap="Reactivity diagram"}
 knitr::include_graphics("images/observable-aggregate-local.svg")
 ```
+
+As noted above, and as we'll see in greater detail, we use the `viewof` interface often to display things to the screen, while keeping track of the value.
+This is such an important concept that I indicate which of the variables in the app use the `viewof` interface.
 
 ```{r echo=FALSE, fig.cap="Legend"}
 knitr::include_graphics("images/observable-legend.svg")
 ```
 
-### Showcase
+Observable does not require variables to be defined in any particular order.
+As a result, I have adapted a style (I've see others do it, too) where a notebook has three sections:
+
+- Showcase: mostly graphical and/or interactive, aimed at a general audience.
+- Workshop: contains supporting code and explanations, aimed at a more-technical audience.
+- Appendix: import objects and offer functions for other notebooks to import.
+
+In this chapter, we'll go over this "backwards".
+
+### Appendix
+
+Here's where wee import stuff into our notebook.
+
+```js
+import { aq, op } from "@uwdata/arquero"
+```
+
+Here, we're importing objects from another notebook, in this case, a notebook that features the arquero library.
+
+Arquero contains functionality along the lines of dplyr and tidyr.
+
+Also tidyjs does much the same thing - it's a matter of preference which you use.
+Tidyjs is designed to be familiar to tidyverse users.
+
+I use a lot of Vega-Lite; arquero is made by the same group. 
+Also, [arquero is designed to work with Apache Arrow](https://observablehq.com/@uwdata/arquero-and-apache-arrow).
 
 ### Workshop
 
-### Appendix
+```js
+inp = {
+  const text = await FileAttachment("penguins.csv").text();
+  const textRemoveNA = text.replaceAll(/,NA/gi, ",");
+
+  return aq.fromCSV(textRemoveNA);
+}
+```
+
+```js
+/* (Table, (* -> Boolean)) -> [String]
+ *
+ * Given an arquero table and a predicate-function,
+ * return an array of strings corresponding to names of
+ * columns that statisfy the predicate.
+ *
+ * This can be useful to identify which columns are strings
+ * or numbers, etc.
+ *
+ * Note that null values are removed before the predicate
+ * is applied.
+ */
+columnNamesPredicate = function (data, predicate) {
+  const colNames = data.columnNames();
+  const keep = colNames.filter((x) =>
+    data
+      .array(x)
+      .filter((x) => !_.isNull(x))
+      .every(predicate)
+  );
+  return keep;
+}
+```
+
+```js
+/* ([String], [String], String) -> Object
+ *
+ * Given an array of column names for grouping, an array of
+ * column names for aggregations, and the name of an aggregation
+ * function, return an object used to construct an Arquero query.
+ *
+ * The query will group by `cols_group`, then rollup (aggregate)
+ * over `cols_agg`, using the function identified using `func_agg`.
+ */
+buildQueryObject = function (cols_group, cols_agg, func_agg) {
+  const values = cols_agg.reduce((acc, val) => {
+    return {
+      ...acc,
+      [val]: { expr: `(d) => op.${func_agg}(d["${val}"])`, func: true }
+    };
+  }, {});
+
+  const queryObject = {
+    verbs: [
+      { verb: "groupby", keys: cols_group },
+      { verb: "rollup", values: values }
+    ]
+  };
+
+  return queryObject;
+}
+```
+
+### Showcase
+
+```js
+viewof table_inp = Inputs.table(inp)
+```
+
+```js
+viewof cols_group = Inputs.select(columnNamesPredicate(inp, _.isString), {
+  label: "Grouping columns",
+  multiple: true
+})
+```
+
+```js
+viewof cols_agg = Inputs.select(columnNamesPredicate(inp, _.isNumber), {
+  label: "Aggregation columns",
+  multiple: true
+})
+```
+
+```js
+viewof func_agg = Inputs.select(["mean", "min", "max"], {
+  label: "Aggregation function",
+  multiple: false
+})
+```
+
+```js
+viewof agg = Inputs.button("Submit", {
+  value: aq.table(),
+  reduce: () => {
+    return aq
+      .queryFrom(buildQueryObject(cols_group, cols_agg, func_agg))
+      .evaluate(inp);
+  }
+})
+```
+
+```js
+viewof table_agg = Inputs.table(agg)
+```
+
+
+

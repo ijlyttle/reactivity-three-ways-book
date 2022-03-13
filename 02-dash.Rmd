@@ -408,13 +408,7 @@ Using a reducer:
 ```{python eval=FALSE} 
 from functools import reduce
 
-def build (acc, val):
-  new_dict = dict(acc)
-  new_dict[val] = func_agg
-  
-  return new_dict
-
-dict_agg = reduce(build, cols_agg, {})
+dict_agg = reduce(lambda acc, val: dict(acc, **{val: func_agg}), cols_agg, {})
 ```
 
 In this situation, it's more verbose and, I think, less clear what is going on unless you are into functional programming.
