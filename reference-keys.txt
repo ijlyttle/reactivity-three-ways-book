@@ -47,9 +47,9 @@ javascript
 tidyverse-thinking-helps
 viewof-is-a-useful-construct
 demonstration-app-2
-showcase
-workshop
 appendix
+workshop
+showcase
 stray-thoughts
 field-guide-to-python
 python-installation

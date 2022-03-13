@@ -252,9 +252,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="3.2" data-path="demonstration-app-2.html"><a href="demonstration-app-2.html"><i class="fa fa-check"></i><b>3.2</b> Demonstration app</a>
 <ul>
-<li class="chapter" data-level="3.2.1" data-path="demonstration-app-2.html"><a href="demonstration-app-2.html#showcase"><i class="fa fa-check"></i><b>3.2.1</b> Showcase</a></li>
+<li class="chapter" data-level="3.2.1" data-path="demonstration-app-2.html"><a href="demonstration-app-2.html#appendix"><i class="fa fa-check"></i><b>3.2.1</b> Appendix</a></li>
 <li class="chapter" data-level="3.2.2" data-path="demonstration-app-2.html"><a href="demonstration-app-2.html#workshop"><i class="fa fa-check"></i><b>3.2.2</b> Workshop</a></li>
-<li class="chapter" data-level="3.2.3" data-path="demonstration-app-2.html"><a href="demonstration-app-2.html#appendix"><i class="fa fa-check"></i><b>3.2.3</b> Appendix</a></li>
+<li class="chapter" data-level="3.2.3" data-path="demonstration-app-2.html"><a href="demonstration-app-2.html#showcase"><i class="fa fa-check"></i><b>3.2.3</b> Showcase</a></li>
 </ul></li>
 </ul></li>
 <li class="appendix"><span><b>Appendix</b></span></li>
@@ -486,13 +486,7 @@ We’ll write this as in terms of data frames; we’ll convert to/from records-f
 <p>Using a reducer:</p>
 <div class="sourceCode" id="cb60"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb60-1"><a href="demonstration-app-1.html#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> functools <span class="im">import</span> <span class="bu">reduce</span></span>
 <span id="cb60-2"><a href="demonstration-app-1.html#cb60-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-3"><a href="demonstration-app-1.html#cb60-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build (acc, val):</span>
-<span id="cb60-4"><a href="demonstration-app-1.html#cb60-4" aria-hidden="true" tabindex="-1"></a>  new_dict <span class="op">=</span> <span class="bu">dict</span>(acc)</span>
-<span id="cb60-5"><a href="demonstration-app-1.html#cb60-5" aria-hidden="true" tabindex="-1"></a>  new_dict[val] <span class="op">=</span> func_agg</span>
-<span id="cb60-6"><a href="demonstration-app-1.html#cb60-6" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb60-7"><a href="demonstration-app-1.html#cb60-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> new_dict</span>
-<span id="cb60-8"><a href="demonstration-app-1.html#cb60-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-9"><a href="demonstration-app-1.html#cb60-9" aria-hidden="true" tabindex="-1"></a>dict_agg <span class="op">=</span> <span class="bu">reduce</span>(build, cols_agg, {})</span></code></pre></div>
+<span id="cb60-3"><a href="demonstration-app-1.html#cb60-3" aria-hidden="true" tabindex="-1"></a>dict_agg <span class="op">=</span> <span class="bu">reduce</span>(<span class="kw">lambda</span> acc, val: <span class="bu">dict</span>(acc, <span class="op">**</span>{val: func_agg}), cols_agg, {})</span></code></pre></div>
 <p>In this situation, it’s more verbose and, I think, less clear what is going on unless you are into functional programming.
 Please pardon this diversion.</p>
 <p>Confident that the “guts” of the app works, we move onto the components and the callbacks.</p>
