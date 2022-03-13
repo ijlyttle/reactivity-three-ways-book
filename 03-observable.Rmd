@@ -283,6 +283,25 @@ Thus, we build the rollup object by using a `reduce()` function on the `cols_gro
 It can be a lot to absorb JavaScript, functional programming, and the peculiarities of arquero *all at once*.
 Keep in mind that you can apply the functional programming you learned using purrr, and your knowledge of how `group_by()` and `summarise()` work in dplyr.
 
+Here's the equivalent in R, using purrr and rlang:
+
+```r
+values <- purrr::reduce(
+  cols_agg,
+  ~c(
+    .x, 
+    rlang::list2(
+      "{.y}" := list(
+        expr = glue::glue('(d) => op.{func_agg}(d["{.y}"])'), 
+        func = TRUE
+      )
+    )
+  ),
+  .init = list()
+)
+```
+
+This gets a little heavy because we have to use `rlang::list2()` to interpolate the names: `"{.y}"`.
  
 We don't have the same check here to validate the aggregation function.
 Security considerations are a little bit different when using Observable.
