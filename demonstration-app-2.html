@@ -325,17 +325,26 @@ Also, <a href="https://observablehq.com/@uwdata/arquero-and-apache-arrow">arquer
 </div>
 <div id="workshop" class="section level3" number="3.2.2">
 <h3><span class="header-section-number">3.2.2</span> Workshop</h3>
+<p>Our first step is to import our data into the notebook.
+One way to do that is to use a file attachment, one of the few times we interact with Observable not using a cell.</p>
+<p>If we have the result of a multi-step process that we want to put into a variable, we can make put the code in some curly braces, then <code>return</code> the result:</p>
 <div class="sourceCode" id="cb73"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb73-1"><a href="demonstration-app-2.html#cb73-1" aria-hidden="true" tabindex="-1"></a>inp <span class="op">=</span> {</span>
 <span id="cb73-2"><a href="demonstration-app-2.html#cb73-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> text <span class="op">=</span> <span class="cf">await</span> <span class="fu">FileAttachment</span>(<span class="st">&quot;penguins.csv&quot;</span>)<span class="op">.</span><span class="fu">text</span>()<span class="op">;</span></span>
 <span id="cb73-3"><a href="demonstration-app-2.html#cb73-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> textRemoveNA <span class="op">=</span> text<span class="op">.</span><span class="fu">replaceAll</span>(<span class="ss">/,NA/gi</span><span class="op">,</span> <span class="st">&quot;,&quot;</span>)<span class="op">;</span></span>
 <span id="cb73-4"><a href="demonstration-app-2.html#cb73-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb73-5"><a href="demonstration-app-2.html#cb73-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> aq<span class="op">.</span><span class="fu">fromCSV</span>(textRemoveNA)<span class="op">;</span></span>
 <span id="cb73-6"><a href="demonstration-app-2.html#cb73-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Here, we see that we import the text, then remove instances of <code>"NA"</code>.
+This puts the text in a format that can be parsed by <code>arquero.fromCSV()</code>, which returns an arquero <code>Table</code>.</p>
+<p>The notebook is designed such that we can bind <code>inp</code> to any arquero <code>Table</code>, not just <code>penguins</code>, and it should work equally well.</p>
+<p>Next, we need a function to help us determine which columns can be used for grouping, and which for aggregation.</p>
+<p>This is a personal habit since trying to be more aware of functional programming, but whenever I make a function in Observable, I like to make the signature as prominent as possible.
+I use a variation of <a href="https://drboolean.gitbooks.io/mostly-adequate-guide-old/content/ch7.html">Hindley-Miller notation</a>, which is a fancy way of saying that I want to keep track of the types for the parameters and return-value:</p>
 <div class="sourceCode" id="cb74"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb74-1"><a href="demonstration-app-2.html#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="co">/* (Table, (* -&gt; Boolean)) -&gt; [String]</span></span>
 <span id="cb74-2"><a href="demonstration-app-2.html#cb74-2" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
 <span id="cb74-3"><a href="demonstration-app-2.html#cb74-3" aria-hidden="true" tabindex="-1"></a><span class="co"> * Given an arquero table and a predicate-function,</span></span>
 <span id="cb74-4"><a href="demonstration-app-2.html#cb74-4" aria-hidden="true" tabindex="-1"></a><span class="co"> * return an array of strings corresponding to names of</span></span>
-<span id="cb74-5"><a href="demonstration-app-2.html#cb74-5" aria-hidden="true" tabindex="-1"></a><span class="co"> * columns that statisfy the predicate.</span></span>
+<span id="cb74-5"><a href="demonstration-app-2.html#cb74-5" aria-hidden="true" tabindex="-1"></a><span class="co"> * columns that satisfy the predicate.</span></span>
 <span id="cb74-6"><a href="demonstration-app-2.html#cb74-6" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
 <span id="cb74-7"><a href="demonstration-app-2.html#cb74-7" aria-hidden="true" tabindex="-1"></a><span class="co"> * This can be useful to identify which columns are strings</span></span>
 <span id="cb74-8"><a href="demonstration-app-2.html#cb74-8" aria-hidden="true" tabindex="-1"></a><span class="co"> * or numbers, etc.</span></span>
@@ -353,6 +362,18 @@ Also, <a href="https://observablehq.com/@uwdata/arquero-and-apache-arrow">arquer
 <span id="cb74-20"><a href="demonstration-app-2.html#cb74-20" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
 <span id="cb74-21"><a href="demonstration-app-2.html#cb74-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> keep<span class="op">;</span></span>
 <span id="cb74-22"><a href="demonstration-app-2.html#cb74-22" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Note that the second parameter, <code>predicate</code>, is a function that takes any type of value and returns a boolean.
+If I wanted to return the names of string-columns, I would supply the Lodash function <code>_.isString</code>.</p>
+<p>An arquero table is a object of arrays, just like R’s data frame is a list of (most-often) vectors; it’s a column-based approach.</p>
+<p>First, we get an array of <code>colNames</code>.
+Then we filter this array using another predicate function:</p>
+<ul>
+<li><code>data.array(x)</code>: given the array of values in the column named <code>x</code>,</li>
+<li><code>.filter((x) =&gt; !_.isNull(x))</code>: keep only those values that are not null,</li>
+<li><code>.every(predicate)</code>: return <code>true</code> if every value in the array satisfies the <code>predicate</code> function we supplies.</li>
+</ul>
+<p>We return only those column names where our predicate function returns <code>true</code>.</p>
+<p>We also need a function to build an arquero query-object based on our specification.</p>
 <div class="sourceCode" id="cb75"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb75-1"><a href="demonstration-app-2.html#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="co">/* ([String], [String], String) -&gt; Object</span></span>
 <span id="cb75-2"><a href="demonstration-app-2.html#cb75-2" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
 <span id="cb75-3"><a href="demonstration-app-2.html#cb75-3" aria-hidden="true" tabindex="-1"></a><span class="co"> * Given an array of column names for grouping, an array of</span></span>
@@ -363,38 +384,76 @@ Also, <a href="https://observablehq.com/@uwdata/arquero-and-apache-arrow">arquer
 <span id="cb75-8"><a href="demonstration-app-2.html#cb75-8" aria-hidden="true" tabindex="-1"></a><span class="co"> * over `cols_agg`, using the function identified using `func_agg`.</span></span>
 <span id="cb75-9"><a href="demonstration-app-2.html#cb75-9" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
 <span id="cb75-10"><a href="demonstration-app-2.html#cb75-10" aria-hidden="true" tabindex="-1"></a>buildQueryObject <span class="op">=</span> <span class="kw">function</span> (cols_group<span class="op">,</span> cols_agg<span class="op">,</span> func_agg) {</span>
-<span id="cb75-11"><a href="demonstration-app-2.html#cb75-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> values <span class="op">=</span> cols_agg<span class="op">.</span><span class="fu">reduce</span>((acc<span class="op">,</span> val) <span class="kw">=&gt;</span> {</span>
-<span id="cb75-12"><a href="demonstration-app-2.html#cb75-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="cb75-11"><a href="demonstration-app-2.html#cb75-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> values <span class="op">=</span> cols_agg<span class="op">.</span><span class="fu">reduce</span>(</span>
+<span id="cb75-12"><a href="demonstration-app-2.html#cb75-12" aria-hidden="true" tabindex="-1"></a>    (acc<span class="op">,</span> val) <span class="kw">=&gt;</span> ({</span>
 <span id="cb75-13"><a href="demonstration-app-2.html#cb75-13" aria-hidden="true" tabindex="-1"></a>      <span class="op">...</span>acc<span class="op">,</span></span>
 <span id="cb75-14"><a href="demonstration-app-2.html#cb75-14" aria-hidden="true" tabindex="-1"></a>      [val]<span class="op">:</span> { <span class="dt">expr</span><span class="op">:</span> <span class="vs">`(d) =&gt; op.</span><span class="sc">${</span>func_agg<span class="sc">}</span><span class="vs">(d[&quot;</span><span class="sc">${</span>val<span class="sc">}</span><span class="vs">&quot;])`</span><span class="op">,</span> <span class="dt">func</span><span class="op">:</span> <span class="kw">true</span> }</span>
-<span id="cb75-15"><a href="demonstration-app-2.html#cb75-15" aria-hidden="true" tabindex="-1"></a>    }<span class="op">;</span></span>
-<span id="cb75-16"><a href="demonstration-app-2.html#cb75-16" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span> {})<span class="op">;</span></span>
-<span id="cb75-17"><a href="demonstration-app-2.html#cb75-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb75-18"><a href="demonstration-app-2.html#cb75-18" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> queryObject <span class="op">=</span> {</span>
-<span id="cb75-19"><a href="demonstration-app-2.html#cb75-19" aria-hidden="true" tabindex="-1"></a>    <span class="dt">verbs</span><span class="op">:</span> [</span>
-<span id="cb75-20"><a href="demonstration-app-2.html#cb75-20" aria-hidden="true" tabindex="-1"></a>      { <span class="dt">verb</span><span class="op">:</span> <span class="st">&quot;groupby&quot;</span><span class="op">,</span> <span class="dt">keys</span><span class="op">:</span> cols_group }<span class="op">,</span></span>
-<span id="cb75-21"><a href="demonstration-app-2.html#cb75-21" aria-hidden="true" tabindex="-1"></a>      { <span class="dt">verb</span><span class="op">:</span> <span class="st">&quot;rollup&quot;</span><span class="op">,</span> <span class="dt">values</span><span class="op">:</span> values }</span>
-<span id="cb75-22"><a href="demonstration-app-2.html#cb75-22" aria-hidden="true" tabindex="-1"></a>    ]</span>
-<span id="cb75-23"><a href="demonstration-app-2.html#cb75-23" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
-<span id="cb75-24"><a href="demonstration-app-2.html#cb75-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb75-25"><a href="demonstration-app-2.html#cb75-25" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> queryObject<span class="op">;</span></span>
-<span id="cb75-26"><a href="demonstration-app-2.html#cb75-26" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<span id="cb75-15"><a href="demonstration-app-2.html#cb75-15" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
+<span id="cb75-16"><a href="demonstration-app-2.html#cb75-16" aria-hidden="true" tabindex="-1"></a>    {}</span>
+<span id="cb75-17"><a href="demonstration-app-2.html#cb75-17" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb75-18"><a href="demonstration-app-2.html#cb75-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-19"><a href="demonstration-app-2.html#cb75-19" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> queryObject <span class="op">=</span> {</span>
+<span id="cb75-20"><a href="demonstration-app-2.html#cb75-20" aria-hidden="true" tabindex="-1"></a>    <span class="dt">verbs</span><span class="op">:</span> [</span>
+<span id="cb75-21"><a href="demonstration-app-2.html#cb75-21" aria-hidden="true" tabindex="-1"></a>      { <span class="dt">verb</span><span class="op">:</span> <span class="st">&quot;groupby&quot;</span><span class="op">,</span> <span class="dt">keys</span><span class="op">:</span> cols_group }<span class="op">,</span></span>
+<span id="cb75-22"><a href="demonstration-app-2.html#cb75-22" aria-hidden="true" tabindex="-1"></a>      { <span class="dt">verb</span><span class="op">:</span> <span class="st">&quot;rollup&quot;</span><span class="op">,</span> <span class="dt">values</span><span class="op">:</span> values }</span>
+<span id="cb75-23"><a href="demonstration-app-2.html#cb75-23" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb75-24"><a href="demonstration-app-2.html#cb75-24" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb75-25"><a href="demonstration-app-2.html#cb75-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-26"><a href="demonstration-app-2.html#cb75-26" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> queryObject<span class="op">;</span></span>
+<span id="cb75-27"><a href="demonstration-app-2.html#cb75-27" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>There are two operations in this query:</p>
+<ul>
+<li><code>"groupby"</code>, where we use the <code>cols_group</code>.</li>
+<li><code>"rollup"</code>, where we build another object to specify the aggregation.</li>
+</ul>
+<p>If our aggregation function is <code>min</code>, and our aggregtion columns are <code>["bill_length_mm", "bill_depth_mm"]</code>, then the rollup specification should be:</p>
+<div class="sourceCode" id="cb76"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb76-1"><a href="demonstration-app-2.html#cb76-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb76-2"><a href="demonstration-app-2.html#cb76-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bill_length_mm</span><span class="op">:</span> {<span class="dt">expr</span><span class="op">:</span> <span class="vs">`(d) =&gt; op.min(d[&quot;bill_length_mm&quot;])`</span><span class="op">,</span> <span class="dt">func</span><span class="op">:</span> <span class="kw">true</span> }<span class="op">,</span></span>
+<span id="cb76-3"><a href="demonstration-app-2.html#cb76-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bill_depth_mm</span><span class="op">:</span> {<span class="dt">expr</span><span class="op">:</span> <span class="vs">`(d) =&gt; op.min(d[&quot;bill_depth_mm&quot;])`</span><span class="op">,</span> <span class="dt">func</span><span class="op">:</span> <span class="kw">true</span> }</span>
+<span id="cb76-4"><a href="demonstration-app-2.html#cb76-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>In arquero, we supply an object to describe rollup (aggregation) operations:
+- The object’s names are column names in the resulting table.
+- The object’s values are expressed as functions.
+- the function takes the “data frame” as an argument; you can subset the data frame by column-name.
+- for security reasons, by default, arquero makes only certain operations available by default; these operations are contained in the <code>op</code> object.</p>
+<p>Thus, we build the rollup object by using a <code>reduce()</code> function on the <code>cols_group</code> array:</p>
+<ul>
+<li>The accumulator is initalized with an empty object, <code>{}</code>.</li>
+<li>For each value (<code>val</code>) in the <code>cols_group</code> array, given the accumulator <code>acc</code>:
+<ul>
+<li>return a new object containing <code>acc</code> and a new named element.</li>
+</ul></li>
+</ul>
+<p>It can be a lot to absorb JavaScript, functional programming, and the peculiarities of arquero <em>all at once</em>.
+Keep in mind that you can apply the functional programming you learned using purrr, and your knowledge of how <code>group_by()</code> and <code>summarise()</code> work in dplyr.</p>
+<p>We don’t have the same check here to validate the aggregation function.
+Security considerations are a little bit different when using Observable.
+Because Observable runs this app entirely in the user’s browser, there is no server component.
+Thus, the user is free to run whatever code they like - it’s a bit like an IDE in that respect.</p>
+<p>There are some considerations around protecting secrets, but these do not apply to this app.</p>
 </div>
 <div id="showcase" class="section level3" number="3.2.3">
 <h3><span class="header-section-number">3.2.3</span> Showcase</h3>
-<div class="sourceCode" id="cb76"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb76-1"><a href="demonstration-app-2.html#cb76-1" aria-hidden="true" tabindex="-1"></a>viewof table_inp <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">table</span>(inp)</span></code></pre></div>
-<div class="sourceCode" id="cb77"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb77-1"><a href="demonstration-app-2.html#cb77-1" aria-hidden="true" tabindex="-1"></a>viewof cols_group <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">select</span>(<span class="fu">columnNamesPredicate</span>(inp<span class="op">,</span> _<span class="op">.</span><span class="at">isString</span>)<span class="op">,</span> {</span>
-<span id="cb77-2"><a href="demonstration-app-2.html#cb77-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">&quot;Grouping columns&quot;</span><span class="op">,</span></span>
-<span id="cb77-3"><a href="demonstration-app-2.html#cb77-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">multiple</span><span class="op">:</span> <span class="kw">true</span></span>
-<span id="cb77-4"><a href="demonstration-app-2.html#cb77-4" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
-<div class="sourceCode" id="cb78"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb78-1"><a href="demonstration-app-2.html#cb78-1" aria-hidden="true" tabindex="-1"></a>viewof cols_agg <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">select</span>(<span class="fu">columnNamesPredicate</span>(inp<span class="op">,</span> _<span class="op">.</span><span class="at">isNumber</span>)<span class="op">,</span> {</span>
-<span id="cb78-2"><a href="demonstration-app-2.html#cb78-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">&quot;Aggregation columns&quot;</span><span class="op">,</span></span>
+<p>Here’s where we show what the notebook can do.
+First, we display the <code>inp</code> table, using Observable’s built-in <code>Inputs.Table()</code>:</p>
+<div class="sourceCode" id="cb77"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb77-1"><a href="demonstration-app-2.html#cb77-1" aria-hidden="true" tabindex="-1"></a>viewof table_inp <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">table</span>(inp)</span></code></pre></div>
+<p><code>table_inp</code> has a value (we can select rows), but we don’t use it.</p>
+<p>Next, we have an input for the grouping columns.
+We are using the <code>columnNamesPredicate()</code> function using Lodash’s <code>_.isString</code>:</p>
+<div class="sourceCode" id="cb78"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb78-1"><a href="demonstration-app-2.html#cb78-1" aria-hidden="true" tabindex="-1"></a>viewof cols_group <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">select</span>(<span class="fu">columnNamesPredicate</span>(inp<span class="op">,</span> _<span class="op">.</span><span class="at">isString</span>)<span class="op">,</span> {</span>
+<span id="cb78-2"><a href="demonstration-app-2.html#cb78-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">&quot;Grouping columns&quot;</span><span class="op">,</span></span>
 <span id="cb78-3"><a href="demonstration-app-2.html#cb78-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">multiple</span><span class="op">:</span> <span class="kw">true</span></span>
 <span id="cb78-4"><a href="demonstration-app-2.html#cb78-4" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<p>The input for <code>cols_agg</code> is almost identical; there, we use <code>_.isNumber</code> as a predicate.</p>
+<p>The input for <code>func_agg</code> is fairly straightforward:</p>
 <div class="sourceCode" id="cb79"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb79-1"><a href="demonstration-app-2.html#cb79-1" aria-hidden="true" tabindex="-1"></a>viewof func_agg <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">select</span>([<span class="st">&quot;mean&quot;</span><span class="op">,</span> <span class="st">&quot;min&quot;</span><span class="op">,</span> <span class="st">&quot;max&quot;</span>]<span class="op">,</span> {</span>
 <span id="cb79-2"><a href="demonstration-app-2.html#cb79-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">&quot;Aggregation function&quot;</span><span class="op">,</span></span>
 <span id="cb79-3"><a href="demonstration-app-2.html#cb79-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">multiple</span><span class="op">:</span> <span class="kw">false</span></span>
 <span id="cb79-4"><a href="demonstration-app-2.html#cb79-4" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<p>For each of these inputs: <code>cols_group</code>, <code>cols_agg</code>, and <code>func_agg</code>, the value is the selection.</p>
+<p>The button is less straightforward; we view is the button, but the value is the aggregated table.
+The two are joined by a <code>reduce</code> option, a function that is run whenever the button is clicked.</p>
+<p>In our case, the reduce function runs the query on the <code>inp</code> table, and returns the aggregated table.</p>
 <div class="sourceCode" id="cb80"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb80-1"><a href="demonstration-app-2.html#cb80-1" aria-hidden="true" tabindex="-1"></a>viewof agg <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">button</span>(<span class="st">&quot;Submit&quot;</span><span class="op">,</span> {</span>
 <span id="cb80-2"><a href="demonstration-app-2.html#cb80-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">value</span><span class="op">:</span> aq<span class="op">.</span><span class="fu">table</span>()<span class="op">,</span></span>
 <span id="cb80-3"><a href="demonstration-app-2.html#cb80-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">reduce</span><span class="op">:</span> () <span class="kw">=&gt;</span> {</span>
@@ -403,6 +462,7 @@ Also, <a href="https://observablehq.com/@uwdata/arquero-and-apache-arrow">arquer
 <span id="cb80-6"><a href="demonstration-app-2.html#cb80-6" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">evaluate</span>(inp)<span class="op">;</span></span>
 <span id="cb80-7"><a href="demonstration-app-2.html#cb80-7" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb80-8"><a href="demonstration-app-2.html#cb80-8" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<p>Finally, we display the <code>agg</code> table:</p>
 <div class="sourceCode" id="cb81"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb81-1"><a href="demonstration-app-2.html#cb81-1" aria-hidden="true" tabindex="-1"></a>viewof table_agg <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">table</span>(agg)</span></code></pre></div>
 
 </div>
