@@ -24,7 +24,7 @@
 <meta name="author" content="Ian Lyttle" />
 
 
-<meta name="date" content="2022-03-09" />
+<meta name="date" content="2022-03-13" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -248,6 +248,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="3.1.2" data-path="principles-2.html"><a href="principles-2.html#reactivity-baked-in"><i class="fa fa-check"></i><b>3.1.2</b> Reactivity baked in</a></li>
 <li class="chapter" data-level="3.1.3" data-path="principles-2.html"><a href="principles-2.html#javascript"><i class="fa fa-check"></i><b>3.1.3</b> JavaScript</a></li>
 <li class="chapter" data-level="3.1.4" data-path="principles-2.html"><a href="principles-2.html#tidyverse-thinking-helps"><i class="fa fa-check"></i><b>3.1.4</b> Tidyverse thinking helps</a></li>
+<li class="chapter" data-level="3.1.5" data-path="principles-2.html"><a href="principles-2.html#viewof-is-a-useful-construct"><i class="fa fa-check"></i><b>3.1.5</b> <code>viewof</code> is a useful construct</a></li>
 </ul></li>
 <li class="chapter" data-level="3.2" data-path="demonstration-app-2.html"><a href="demonstration-app-2.html"><i class="fa fa-check"></i><b>3.2</b> Demonstration app</a>
 <ul>
@@ -294,12 +295,69 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="reactivity-baked-in" class="section level3" number="3.1.2">
 <h3><span class="header-section-number">3.1.2</span> Reactivity baked in</h3>
+<p>Generally, each cell in an Observable notebook returns a value that is bound to a variable.
+Here’s a straightforward example:</p>
+<div class="sourceCode" id="cb69"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb69-1"><a href="principles-2.html#cb69-1" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> <span class="dv">3</span></span></code></pre></div>
+<div class="sourceCode" id="cb70"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb70-1"><a href="principles-2.html#cb70-1" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> a</span></code></pre></div>
+<p>If we change the first cell, such that <code>a = 4</code>, the value of <code>b</code> is automatically updated; we don’t need to run any other cells.</p>
+<p>Although an Observable notebook appears like a Jupyter notebook, or like an RMarkdown document, there are some important differences:</p>
+<ul>
+<li><p>As mentioned above, values of cells are updated automatically, much like an Excel spreadsheet.</p></li>
+<li><p>One consequence of this is that notebooks need not follow a linear order from top to bottom.
+A value set later in the notebook can be referenced earlier in the notebook.</p></li>
+<li><p>Just about everything you do in an Observable notebook is in a cell.
+A cell can be JavaScript, Markdown, HTML, TeX, or SQL.
+(The vast majority of cells in my notebooks are Markdown or JavaScript.)</p></li>
+</ul>
 </div>
 <div id="javascript" class="section level3" number="3.1.3">
 <h3><span class="header-section-number">3.1.3</span> JavaScript</h3>
+<p>Although Observable cells can use a variety of languages, the core language is JavaScript.
+Or at least a close approximation to JavaScript.</p>
+<p>Coming from R, these are the biggest things I need to keep in mind:</p>
+<ul>
+<li><p>Objects (analgous to R’s named lists) and arrays (analgous to R’s unnamed lists and vectors) are mutable.
+If you pass an object as an argument to a function, then change the object in the function, the original object is changed.
+This differs from R, and can lead to nasty surprises.</p></li>
+<li><p>Strings and numbers are immutable.
+Also, a scalar value is different from an array containing a single scalar value.</p></li>
+</ul>
 </div>
 <div id="tidyverse-thinking-helps" class="section level3" number="3.1.4">
 <h3><span class="header-section-number">3.1.4</span> Tidyverse thinking helps</h3>
+<p>It <em>does</em> take a while to get used to JavaScript.
+That said, it is more-and-more becoming a language for data-science alongside R and Python.</p>
+<p>Personally, I rely on the mental models I have developed using dplyr, purrr, tidyr, and ggplot2.
+When working in JavaScript, there may or may not be an analogue to the tidyverse function you have in mind.
+The JavaScript function may take arguments in a different order, or have a completely different way of working.
+For me, it helps to know “what I want to do with the data”.
+It also helps to have the confidence of having done something similar using tidyverse.</p>
+</div>
+<div id="viewof-is-a-useful-construct" class="section level3" number="3.1.5">
+<h3><span class="header-section-number">3.1.5</span> <code>viewof</code> is a useful construct</h3>
+<p>This is something particular to Observable, not JavaScript in general.
+Once I started to get comfortable with <code>viewof</code>, Observable got easier for me.</p>
+<p>We’ll see this pattern used many times in the example, but it may be useful to
+Consider an Observable input (not operable in this book):</p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-32"></span>
+<img src="images/observable-button-example.png" alt="Observable button" width="640" />
+<p class="caption">
+Figure 3.1: Observable button
+</p>
+</div>
+<div class="sourceCode" id="cb71"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb71-1"><a href="principles-2.html#cb71-1" aria-hidden="true" tabindex="-1"></a>viewof clicks <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">button</span>(<span class="st">&quot;OK&quot;</span><span class="op">,</span> {<span class="dt">label</span><span class="op">:</span> <span class="st">&quot;Click me&quot;</span>})</span></code></pre></div>
+<p>In this context, the variable <code>clicks</code>:</p>
+<ul>
+<li>has a <em>value</em>: number of times the button has been clicked.</li>
+<li>has a <em>view</em>: the rendered view in the browser.</li>
+</ul>
+<p>When we use <code>viewof clicks = ...</code>, we are telling Observable:</p>
+<ul>
+<li>we want to view the button <strong>here</strong></li>
+<li>we want to bind the value of the button to the variable <code>clicks</code></li>
+</ul>
+<p>We can use the variable <code>clicks</code> elsewhere in the notebook.</p>
+<p>The <em>view</em> is a side-effect; the <em>value</em> is, well, a value.</p>
 </div>
 </div>
             </section>

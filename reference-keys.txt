@@ -4,6 +4,7 @@ fig:unnamed-chunk-8
 fig:unnamed-chunk-9
 fig:unnamed-chunk-32
 fig:unnamed-chunk-33
+fig:unnamed-chunk-34
 shiny
 principles
 pure-functions-vs.-side-effects
@@ -44,6 +45,7 @@ hosted-service-runs-in-browser
 reactivity-baked-in
 javascript
 tidyverse-thinking-helps
+viewof-is-a-useful-construct
 demonstration-app-2
 showcase
 workshop
