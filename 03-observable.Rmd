@@ -33,9 +33,84 @@ The Observable service uses the [Observable runtime](https://github.com/observab
 
 ### Reactivity baked in
 
+Generally, each cell in an Observable notebook returns a value that is bound to a variable. 
+Here's a straightforward example:
+
+```js
+a = 3
+```
+
+```js
+b = a
+```
+
+If we change the first cell, such that `a = 4`, the value of `b` is automatically updated; we don't need to run any other cells.
+
+Although an Observable notebook appears like a Jupyter notebook, or like an RMarkdown document, there are some important differences:
+
+- As mentioned above, values of cells are updated automatically, much like an Excel spreadsheet.
+
+- One consequence of this is that notebooks need not follow a linear order from top to bottom. 
+  A value set later in the notebook can be referenced earlier in the notebook.
+  
+- Just about everything you do in an Observable notebook is in a cell. 
+  A cell can be JavaScript, Markdown, HTML, TeX, or SQL. 
+  (The vast majority of cells in my notebooks are Markdown or JavaScript.)
+
 ### JavaScript
 
+Although Observable cells can use a variety of languages, the core language is JavaScript.
+Or at least a close approximation to JavaScript.
+
+Coming from R, these are the biggest things I need to keep in mind:
+
+- Objects (analgous to R's named lists) and arrays (analgous to R's unnamed lists and vectors) are mutable.
+  If you pass an object as an argument to a function, then change the object in the function, the original object is changed.
+  This differs from R, and can lead to nasty surprises.
+
+- Strings and numbers are immutable. 
+  Also, a scalar value is different from an array containing a single scalar value.
+
 ### Tidyverse thinking helps
+
+It *does* take a while to get used to JavaScript.
+That said, it is more-and-more becoming a language for data-science alongside R and Python.
+
+Personally, I rely on the mental models I have developed using dplyr, purrr, tidyr, and ggplot2.
+When working in JavaScript, there may or may not be an analogue to the tidyverse function you have in mind.
+The JavaScript function may take arguments in a different order, or have a completely different way of working.
+For me, it helps to know "what I want to do with the data".
+It also helps to have the confidence of having done something similar using tidyverse.
+
+### `viewof` is a useful construct
+
+This is something particular to Observable, not JavaScript in general.
+Once I started to get comfortable with `viewof`, Observable got easier for me.
+
+We'll see this pattern used many times in the example, but it may be useful to 
+Consider an Observable input (not operable in this book):
+
+```{r echo=FALSE, fig.cap="Observable button"}
+knitr::include_graphics("images/observable-button-example.png")
+```
+
+```js
+viewof clicks = Inputs.button("OK", {label: "Click me"})
+```
+
+In this context, the variable `clicks`:
+
+- has a *value*: number of times the button has been clicked.
+- has a *view*: the rendered view in the browser.
+
+When we use `viewof clicks = ...`, we are telling Observable:
+
+- we want to view the button **here**
+- we want to bind the value of the button to the variable `clicks`
+
+We can use the variable `clicks` elsewhere in the notebook.
+
+The *view* is a side-effect; the *value* is, well, a value.
 
 ## Demonstration app
 
