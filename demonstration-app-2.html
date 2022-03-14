@@ -24,7 +24,7 @@
 <meta name="author" content="Ian Lyttle" />
 
 
-<meta name="date" content="2022-03-13" />
+<meta name="date" content="2022-03-14" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -427,20 +427,21 @@ Then we filter this array using another predicate function:</p>
 <p>It can be a lot to absorb JavaScript, functional programming, and the peculiarities of arquero <em>all at once</em>.
 Keep in mind that you can apply the functional programming you learned using purrr, and your knowledge of how <code>group_by()</code> and <code>summarise()</code> work in dplyr.</p>
 <p>Here’s the equivalent in R, using purrr and rlang:</p>
-<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb77-1"><a href="demonstration-app-2.html#cb77-1" aria-hidden="true" tabindex="-1"></a>values <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">reduce</span>(</span>
-<span id="cb77-2"><a href="demonstration-app-2.html#cb77-2" aria-hidden="true" tabindex="-1"></a>  cols_agg,</span>
-<span id="cb77-3"><a href="demonstration-app-2.html#cb77-3" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span><span class="fu">c</span>(</span>
-<span id="cb77-4"><a href="demonstration-app-2.html#cb77-4" aria-hidden="true" tabindex="-1"></a>    .x, </span>
-<span id="cb77-5"><a href="demonstration-app-2.html#cb77-5" aria-hidden="true" tabindex="-1"></a>    rlang<span class="sc">::</span><span class="fu">list2</span>(</span>
-<span id="cb77-6"><a href="demonstration-app-2.html#cb77-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;{.y}&quot;</span> <span class="sc">:</span><span class="er">=</span> <span class="fu">list</span>(</span>
-<span id="cb77-7"><a href="demonstration-app-2.html#cb77-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">expr =</span> glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">&#39;(d) =&gt; op.{func_agg}(d[&quot;{.y}&quot;])&#39;</span>), </span>
-<span id="cb77-8"><a href="demonstration-app-2.html#cb77-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">func =</span> <span class="cn">TRUE</span></span>
-<span id="cb77-9"><a href="demonstration-app-2.html#cb77-9" aria-hidden="true" tabindex="-1"></a>      )</span>
-<span id="cb77-10"><a href="demonstration-app-2.html#cb77-10" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb77-11"><a href="demonstration-app-2.html#cb77-11" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb77-12"><a href="demonstration-app-2.html#cb77-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">.init =</span> <span class="fu">list</span>()</span>
-<span id="cb77-13"><a href="demonstration-app-2.html#cb77-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
-<p>This gets a little heavy because we have to use <code>rlang::list2()</code> to interpolate the names: <code>"{.y}"</code>.</p>
+<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb77-1"><a href="demonstration-app-2.html#cb77-1" aria-hidden="true" tabindex="-1"></a>reducer <span class="ot">&lt;-</span> <span class="cf">function</span>(acc, val, func) {</span>
+<span id="cb77-2"><a href="demonstration-app-2.html#cb77-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-3"><a href="demonstration-app-2.html#cb77-3" aria-hidden="true" tabindex="-1"></a>  mapped <span class="ot">&lt;-</span> </span>
+<span id="cb77-4"><a href="demonstration-app-2.html#cb77-4" aria-hidden="true" tabindex="-1"></a>    rlang<span class="sc">::</span><span class="fu">list2</span>(</span>
+<span id="cb77-5"><a href="demonstration-app-2.html#cb77-5" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;{val}&quot;</span> <span class="sc">:</span><span class="er">=</span> <span class="fu">list</span>(</span>
+<span id="cb77-6"><a href="demonstration-app-2.html#cb77-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">expr =</span> glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">&#39;(d) =&gt; op.{func}(d[&quot;{val}&quot;])&#39;</span>), </span>
+<span id="cb77-7"><a href="demonstration-app-2.html#cb77-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">func =</span> <span class="cn">TRUE</span></span>
+<span id="cb77-8"><a href="demonstration-app-2.html#cb77-8" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb77-9"><a href="demonstration-app-2.html#cb77-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb77-10"><a href="demonstration-app-2.html#cb77-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-11"><a href="demonstration-app-2.html#cb77-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(acc, mapped)</span>
+<span id="cb77-12"><a href="demonstration-app-2.html#cb77-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb77-13"><a href="demonstration-app-2.html#cb77-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-14"><a href="demonstration-app-2.html#cb77-14" aria-hidden="true" tabindex="-1"></a>values <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">reduce</span>(cols_agg, reducer, <span class="at">func =</span> func_agg, <span class="at">.init =</span> <span class="fu">list</span>())</span></code></pre></div>
+<p>This gets a little heavy because we have to use <code>rlang::list2()</code> to interpolate the names: <code>"{val}" :=</code>.</p>
 <p>We don’t have the same check here to validate the aggregation function.
 Security considerations are a little bit different when using Observable.
 Because Observable runs this app entirely in the user’s browser, there is no server component.
