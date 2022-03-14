@@ -286,22 +286,23 @@ Keep in mind that you can apply the functional programming you learned using pur
 Here's the equivalent in R, using purrr and rlang:
 
 ```r
-values <- purrr::reduce(
-  cols_agg,
-  ~c(
-    .x, 
+reducer <- function(acc, val, func) {
+
+  mapped <- 
     rlang::list2(
-      "{.y}" := list(
-        expr = glue::glue('(d) => op.{func_agg}(d["{.y}"])'), 
+      "{val}" := list(
+        expr = glue::glue('(d) => op.{func}(d["{val}"])'), 
         func = TRUE
       )
     )
-  ),
-  .init = list()
-)
+
+  c(acc, mapped)
+}
+
+values <- purrr::reduce(cols_agg, reducer, func = func_agg, .init = list())
 ```
 
-This gets a little heavy because we have to use `rlang::list2()` to interpolate the names: `"{.y}"`.
+This gets a little heavy because we have to use `rlang::list2()` to interpolate the names: `"{val}" :=`.
  
 We don't have the same check here to validate the aggregation function.
 Security considerations are a little bit different when using Observable.
