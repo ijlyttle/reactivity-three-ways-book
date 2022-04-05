@@ -68,7 +68,7 @@ In your newly-created project directory, from the terminal command-line:
 
 This creates your Python virtual environment by creating a directory in the root of your project called `venv`.
 The name of the directory is determined by the last argument, in this case `./venv`.
-There are a number of "standard" ways to name virtual environments; `venv` is one of them. 
+There are a number of "standard" ways to name virtual environments; `"venv"` is one of them. 
 It's really up to you and your collaborators. 
 
 The important thing is to make sure that you have a `.gitignore` entry for the virtual-environment directory.
