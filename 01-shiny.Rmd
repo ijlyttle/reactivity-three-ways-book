@@ -56,7 +56,11 @@ function(file_name) {
 }
 
 # this might make a change in a remote service
-function(url) {
+function(url, data) {
+  
+  h <- curl::new_handle()
+  curl::handle_setform(h, data)
+  
   curl::curl(url)
 }
 ```
@@ -160,7 +164,7 @@ As you can see, it sources `R/aggregate-local.R`, which contains our helper func
 ### Helper functions
 
 Before writing a Shiny app, I like to write out a set of non-reactive functions that will do the "heavy lifting". 
-To the extent possible, these are pure functions; this will make it easier to test. 
+To the extent possible, these are pure functions, which makes it easier to test. 
 I keep these functions in an `R` folder alongside my app; here's a [link](https://github.com/ijlyttle/reactivity-demo-shiny/blob/main/R/aggregate-local.R) to the actual code.
 
 Just like in the app, we'll use the [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/) dataset:
@@ -349,7 +353,7 @@ wellPanel(
 )
 ```
 
-One of the inputs I would like to point out is for `input$cols_group`.
+Let's look more closely at `input$cols_group` (this also applies to `input$cols_agg`):
 
 ```{r cols_group, eval=FALSE}
 selectizeInput(
@@ -360,8 +364,8 @@ selectizeInput(
 )
 ```
 
-Note that the initial `choices` is supplied as an empty vector.
-Note also that the reactivity diagram for `cols_group` indicates that, we use an observer function to update this input. 
+Note that `choices` is specified, initially, as an empty vector.
+The reactivity diagram for `cols_group` indicates that, we use an observer function to update this input. 
 We'll do this in the server function, where we update the `choices`.
 
 #### Outputs
@@ -455,8 +459,8 @@ agg <-
 ```
 
 The first thing we do in the reactive is make sure that the value of `input$func_agg` is among the choices we specified.
-I'm sure you noticed that this is a redundant check.
-Although this is one place I strive for redundancy, I am careful to validate using the same values: `agg_function_choices`.
+I'm sure you noticed that this is an extra check.
+Although redundant, I am careful to validate using the same values: `agg_function_choices`.
 You can read more about input validation in the [security chapter](https://mastering-shiny.org/scaling-security.html) of Mastering Shiny.
 
 Then, we use our `group_aggregate()` helper function. 

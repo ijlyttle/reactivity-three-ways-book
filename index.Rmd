@@ -23,10 +23,10 @@ An example app is created for each framework:
  - create an aggregated data-frame from the input, using the specification.
    - show the aggregated data-frame as a table.
    
-The intended audience are folks who know how to develop a basic Shiny app, and wish to extend their knowledge to Dash (Python) or Observable (JavaScript). I will assume you have:
+This book is written for folks who know how to develop basic Shiny apps, and wish to extend their knowledge to Dash (Python) or Observable (JavaScript). I will assume you have:
 
  - basic knowledge of how to build a Shiny app.
- - some familiarity with the Tidyverse, in particular, dplyr.
+ - some familiarity with the tidyverse, in particular, dplyr.
 
 In this book:
 
@@ -38,6 +38,9 @@ In this book:
 
 
 The goal is to give you the confidence to take the next steps to learn more about each of these frameworks.
+
+## Other resources {.unnumbered}
+
 Here are some resources I have found useful:
 
  - Shiny's [tutorials](https://shiny.rstudio.com/tutorial/).
