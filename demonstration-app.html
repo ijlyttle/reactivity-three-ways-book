@@ -24,7 +24,7 @@
 <meta name="author" content="Ian Lyttle" />
 
 
-<meta name="date" content="2022-03-14" />
+<meta name="date" content="2022-04-05" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -204,7 +204,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><a href="./">Data-Science Reactivity: Three Ways</a></li>
 
 <li class="divider"></li>
-<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a>
+<ul>
+<li class="chapter" data-level="" data-path="other-resources.html"><a href="other-resources.html"><i class="fa fa-check"></i>Other resources</a></li>
+</ul></li>
 <li class="chapter" data-level="1" data-path="shiny.html"><a href="shiny.html"><i class="fa fa-check"></i><b>1</b> Shiny</a>
 <ul>
 <li class="chapter" data-level="1.1" data-path="principles.html"><a href="principles.html"><i class="fa fa-check"></i><b>1.1</b> Principles</a>
@@ -334,7 +337,7 @@ R/
 <div id="helper-functions" class="section level3" number="1.2.3">
 <h3><span class="header-section-number">1.2.3</span> Helper functions</h3>
 <p>Before writing a Shiny app, I like to write out a set of non-reactive functions that will do the “heavy lifting”.
-To the extent possible, these are pure functions; this will make it easier to test.
+To the extent possible, these are pure functions, which makes it easier to test.
 I keep these functions in an <code>R</code> folder alongside my app; here’s a <a href="https://github.com/ijlyttle/reactivity-demo-shiny/blob/main/R/aggregate-local.R">link</a> to the actual code.</p>
 <p>Just like in the app, we’ll use the <a href="https://allisonhorst.github.io/palmerpenguins/">palmerpenguins</a> dataset:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="demonstration-app.html#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># this is not part of the helper functions - it&#39;s for exposition here</span></span>
@@ -507,15 +510,15 @@ our interactive code might look like:</p>
 <span id="cb25-23"><a href="demonstration-app.html#cb25-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">label =</span> <span class="st">&quot;Submit&quot;</span></span>
 <span id="cb25-24"><a href="demonstration-app.html#cb25-24" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb25-25"><a href="demonstration-app.html#cb25-25" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
-<p>One of the inputs I would like to point out is for <code>input$cols_group</code>.</p>
+<p>Let’s look more closely at <code>input$cols_group</code> (this also applies to <code>input$cols_agg</code>):</p>
 <div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="demonstration-app.html#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">selectizeInput</span>(</span>
 <span id="cb26-2"><a href="demonstration-app.html#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">inputId =</span> <span class="st">&quot;cols_group&quot;</span>,</span>
 <span id="cb26-3"><a href="demonstration-app.html#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">label =</span> <span class="st">&quot;Grouping columns&quot;</span>,</span>
 <span id="cb26-4"><a href="demonstration-app.html#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">choices =</span> <span class="fu">c</span>(),</span>
 <span id="cb26-5"><a href="demonstration-app.html#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">multiple =</span> <span class="cn">TRUE</span></span>
 <span id="cb26-6"><a href="demonstration-app.html#cb26-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
-<p>Note that the initial <code>choices</code> is supplied as an empty vector.
-Note also that the reactivity diagram for <code>cols_group</code> indicates that, we use an observer function to update this input.
+<p>Note that <code>choices</code> is specified, initially, as an empty vector.
+The reactivity diagram for <code>cols_group</code> indicates that, we use an observer function to update this input.
 We’ll do this in the server function, where we update the <code>choices</code>.</p>
 </div>
 <div id="outputs" class="section level4" number="1.2.4.2">
@@ -589,8 +592,8 @@ I did this with future expansion in mind, where <code>inp()</code> could also re
 <span id="cb31-12"><a href="demonstration-app.html#cb31-12" aria-hidden="true" tabindex="-1"></a>  }) <span class="sc">|&gt;</span></span>
 <span id="cb31-13"><a href="demonstration-app.html#cb31-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bindEvent</span>(input<span class="sc">$</span>button, <span class="at">ignoreNULL =</span> <span class="cn">TRUE</span>, <span class="at">ignoreInit =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <p>The first thing we do in the reactive is make sure that the value of <code>input$func_agg</code> is among the choices we specified.
-I’m sure you noticed that this is a redundant check.
-Although this is one place I strive for redundancy, I am careful to validate using the same values: <code>agg_function_choices</code>.
+I’m sure you noticed that this is an extra check.
+Although redundant, I am careful to validate using the same values: <code>agg_function_choices</code>.
 You can read more about input validation in the <a href="https://mastering-shiny.org/scaling-security.html">security chapter</a> of Mastering Shiny.</p>
 <p>Then, we use our <code>group_aggregate()</code> helper function.
 For me, having tested it outside of Shiny helped me focus on getting the rest of the code working.</p>
