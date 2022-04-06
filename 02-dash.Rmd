@@ -34,7 +34,7 @@ This is different from Shiny, which stores the state of the application in the s
 Further, Shiny manages the serialization/de-serialization of data to/from the UI; with Dash, you have to manage that yourself.
 
 These are not insurmountable obstacles, as well see in the rest of this section. 
-For example, one way to store the state is in the UI of the app.
+For example, one place to store the state is the user's browser, in the web-page (DOM) itself.
 
 ### Everything that exists is a component
 
@@ -68,8 +68,6 @@ This is a [dropdown component](https://dash.plotly.com/dash-core-components/drop
 In this case, we don't define the `options` or `value` properties. We'll update the `options` dynamically, and let the user set the `value`.
 
 Like other components, dropdowns have a number of [properties](https://dash.plotly.com/dash-core-components/dropdown#dropdown-properties); we can set them either at initialization, as we did here, or we can set them using a callback.
-
-Talk about the DOM.
 
 ### Everything that happens is a callback
 
@@ -157,7 +155,7 @@ The other option is to use base64 encoding; I have seen this used for uploading/
 
 ## Demonstration app
 
-I've tried to brief in outlining the priniciples for a Dash app; I think they will make more sense in the context of the Dash demo-app.
+I've tried to outline, briefly, some of the principles used to build a Dash app; I think they will make more sense in the context of the Dash demo-app.
 
 ### Description
 
@@ -189,7 +187,7 @@ knitr::include_graphics("images/dash-legend.svg")
 
 ### Prelims
 
-As with Shiny, in the rest of this chapter, we'll highlight the code used to make app, and the design choices behind the code.
+Like we did with Shiny, in the rest of this chapter, we'll highlight the code used to make app, and the design choices behind the code.
 In the [repository](https://github.com/ijlyttle/reactivity-demo-dash), there are a some files to pay attention to:
 
 ```

@@ -218,7 +218,7 @@ Then we filter this array using another predicate function:
 
 - `data.array(x)`: given the array of values in the column named `x`,
 - `.filter((x) => !_.isNull(x))`: keep only those values that are not null,
-- `.every(predicate)`: return `true` if every value in the array satisfies the `predicate` function we supplies.
+- `.every(predicate)`: return `true` if every value in the array satisfies the `predicate` function we supply.
 
 We return only those column names where our predicate function returns `true`.
 
@@ -268,16 +268,17 @@ If our aggregation function is `min`, and our aggregtion columns are `["bill_len
 }
 ```
 
-In arquero, we supply an object to describe rollup (aggregation) operations: 
+Using the object above and example, here's how we describe rollup (aggregation) operations: 
+
  - The object's names are column names in the resulting table.
  - The object's values are expressed as functions.
    - the function takes the "data frame" as an argument; you can subset the data frame by column-name.
    - for security reasons, by default, arquero makes only certain operations available by default; these operations are contained in the `op` object.
 
-Thus, we build the rollup object by using a `reduce()` function on the `cols_group` array:
+We can build the rollup object by using a `reduce()` function on the `cols_group` array:
 
 - The accumulator is initalized with an empty object, `{}`.
-- For each value (`val`) in the `cols_group` array, given the accumulator `acc`:
+- For each value ,`val`, in the `cols_group` array, given the accumulator, `acc`:
   - return a new object containing `acc` and a new named element.
   
 It can be a lot to absorb JavaScript, functional programming, and the peculiarities of arquero *all at once*.
@@ -302,7 +303,7 @@ reducer <- function(acc, val, func) {
 values <- purrr::reduce(cols_agg, reducer, func = func_agg, .init = list())
 ```
 
-This gets a little heavy because we have to use `rlang::list2()` to interpolate the names: `"{val}" :=`.
+This gets heavy because we have to use `rlang::list2()` to interpolate the names: `"{val}" :=`.
  
 We don't have the same check here to validate the aggregation function.
 Security considerations are a little bit different when using Observable.
