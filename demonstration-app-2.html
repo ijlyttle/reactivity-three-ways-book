@@ -24,7 +24,7 @@
 <meta name="author" content="Ian Lyttle" />
 
 
-<meta name="date" content="2022-04-05" />
+<meta name="date" content="2022-04-06" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -379,7 +379,7 @@ Then we filter this array using another predicate function:</p>
 <ul>
 <li><code>data.array(x)</code>: given the array of values in the column named <code>x</code>,</li>
 <li><code>.filter((x) =&gt; !_.isNull(x))</code>: keep only those values that are not null,</li>
-<li><code>.every(predicate)</code>: return <code>true</code> if every value in the array satisfies the <code>predicate</code> function we supplies.</li>
+<li><code>.every(predicate)</code>: return <code>true</code> if every value in the array satisfies the <code>predicate</code> function we supply.</li>
 </ul>
 <p>We return only those column names where our predicate function returns <code>true</code>.</p>
 <p>We also need a function to build an arquero query-object based on our specification.</p>
@@ -420,15 +420,19 @@ Then we filter this array using another predicate function:</p>
 <span id="cb76-2"><a href="demonstration-app-2.html#cb76-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bill_length_mm</span><span class="op">:</span> {<span class="dt">expr</span><span class="op">:</span> <span class="vs">`(d) =&gt; op.min(d[&quot;bill_length_mm&quot;])`</span><span class="op">,</span> <span class="dt">func</span><span class="op">:</span> <span class="kw">true</span> }<span class="op">,</span></span>
 <span id="cb76-3"><a href="demonstration-app-2.html#cb76-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bill_depth_mm</span><span class="op">:</span> {<span class="dt">expr</span><span class="op">:</span> <span class="vs">`(d) =&gt; op.min(d[&quot;bill_depth_mm&quot;])`</span><span class="op">,</span> <span class="dt">func</span><span class="op">:</span> <span class="kw">true</span> }</span>
 <span id="cb76-4"><a href="demonstration-app-2.html#cb76-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
-<p>In arquero, we supply an object to describe rollup (aggregation) operations:
-- The object’s names are column names in the resulting table.
-- The object’s values are expressed as functions.
-- the function takes the “data frame” as an argument; you can subset the data frame by column-name.
-- for security reasons, by default, arquero makes only certain operations available by default; these operations are contained in the <code>op</code> object.</p>
-<p>Thus, we build the rollup object by using a <code>reduce()</code> function on the <code>cols_group</code> array:</p>
+<p>Using the object above and example, here’s how we describe rollup (aggregation) operations:</p>
+<ul>
+<li>The object’s names are column names in the resulting table.</li>
+<li>The object’s values are expressed as functions.
+<ul>
+<li>the function takes the “data frame” as an argument; you can subset the data frame by column-name.</li>
+<li>for security reasons, by default, arquero makes only certain operations available by default; these operations are contained in the <code>op</code> object.</li>
+</ul></li>
+</ul>
+<p>We can build the rollup object by using a <code>reduce()</code> function on the <code>cols_group</code> array:</p>
 <ul>
 <li>The accumulator is initalized with an empty object, <code>{}</code>.</li>
-<li>For each value (<code>val</code>) in the <code>cols_group</code> array, given the accumulator <code>acc</code>:
+<li>For each value ,<code>val</code>, in the <code>cols_group</code> array, given the accumulator, <code>acc</code>:
 <ul>
 <li>return a new object containing <code>acc</code> and a new named element.</li>
 </ul></li>
@@ -450,7 +454,7 @@ Keep in mind that you can apply the functional programming you learned using pur
 <span id="cb77-12"><a href="demonstration-app-2.html#cb77-12" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb77-13"><a href="demonstration-app-2.html#cb77-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb77-14"><a href="demonstration-app-2.html#cb77-14" aria-hidden="true" tabindex="-1"></a>values <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">reduce</span>(cols_agg, reducer, <span class="at">func =</span> func_agg, <span class="at">.init =</span> <span class="fu">list</span>())</span></code></pre></div>
-<p>This gets a little heavy because we have to use <code>rlang::list2()</code> to interpolate the names: <code>"{val}" :=</code>.</p>
+<p>This gets heavy because we have to use <code>rlang::list2()</code> to interpolate the names: <code>"{val}" :=</code>.</p>
 <p>We don’t have the same check here to validate the aggregation function.
 Security considerations are a little bit different when using Observable.
 Because Observable runs this app entirely in the user’s browser, there is no server component.
